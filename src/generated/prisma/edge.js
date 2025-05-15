@@ -211,7 +211,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/home/matheus/pokariba/server/src/generated/prisma",
+      "value": "C:\\Users\\Fernanda\\Documents\\server\\src\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -220,17 +220,16 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "debian-openssl-3.0.x",
+        "value": "windows",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/home/matheus/pokariba/server/prisma/schema.prisma",
+    "sourceFilePath": "C:\\Users\\Fernanda\\Documents\\server\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
-    "rootEnvPath": "../../../.env",
-    "schemaEnvPath": "../../../.env"
+    "rootEnvPath": null
   },
   "relativePath": "../../../prisma",
   "clientVersion": "6.7.0",
@@ -239,11 +238,12 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "postgresql://pokariba_user:senha_segura@localhost:5432/pokariba"
+        "value": null
       }
     }
   },
