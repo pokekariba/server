@@ -133,7 +133,7 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
 
   } catch (erro) {
     console.error("Erro no cadastro:", erro);
-    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde.", erro });
+    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
 
