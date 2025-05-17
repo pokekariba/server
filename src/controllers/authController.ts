@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "../generated/prisma";
+import { PrismaClient } from '@prisma/client'
 import { gerarAccessToken } from "../utils/jwt";
 import { compararString } from "../utils/criptografia";
 
@@ -8,11 +8,11 @@ const prisma = new PrismaClient();
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { usuario, senha } = req.body;
-
+    
     const user = await prisma.usuario.findFirst({
       where: { nome: usuario }
     });
-
+    
     if (!user) {
       res.status(404).json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
       return;

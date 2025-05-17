@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import { gerarAccessToken, verificarToken } from "../utils/jwt";
-import { PrismaClient } from '../generated/prisma';
+import { PrismaClient } from '@prisma/client'
+
 
 const prisma = new PrismaClient();
 
