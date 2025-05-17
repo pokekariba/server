@@ -1,0 +1,52 @@
+import { Request, Response } from "express";
+import { PrismaClient } from "../generated/prisma";
+import { gerarAccessToken } from "../utils/jwt";
+import { compararString } from "../utils/criptografia";
+
+const prisma = new PrismaClient();
+
+export const login = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { usuario, senha } = req.body;
+
+    const user = await prisma.usuario.findFirst({
+      where: { nome: usuario }
+    });
+
+    if (!user) {
+      res.status(404).json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
+      return;
+    }
+
+    const senhaValida = await compararString(senha, user.senha);
+
+    if (!senhaValida) {
+      res.status(404).json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
+      return;
+    }
+
+    if (user.status === "banido") {
+      res.status(403).json({ mensagem: "Usuário banido." });
+      return;
+    }
+
+    const token = gerarAccessToken(user.id.toString());
+
+    res.setHeader("Authorization", `Bearer ${token}`);
+    res.status(200).json({
+      email: user.email,
+      nome: user.nome,
+      moedas: user.moedas,
+      dataCriacao: user.data_criacao.toLocaleDateString("pt-BR"),
+      partidasGanhas: user.partidas_ganhas,
+      partidasTotais: user.partidas_totais,
+      avatarAtivo: user.avatar_ativo,
+      fundoAtivo: user.fundo_ativo,
+      baralhoAtivo: user.deck_ativo
+    });
+
+  } catch (erro) {
+    console.error("Erro no login:", erro);
+    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+  }
+};
