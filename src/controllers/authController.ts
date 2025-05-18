@@ -1,7 +1,26 @@
 import { Request, Response } from "express";
+<<<<<<< Updated upstream
 import { PrismaClient } from '@prisma/client'
 import { gerarAccessToken } from "../utils/jwt";
 import { compararString } from "../utils/criptografia";
+=======
+import { PrismaClient } from '@prisma/client';
+import { gerarAccessToken, gerarPasswordResetToken } from "../utils/jwt";
+import { compararString, criptografarString } from "../utils/criptografia";
+import nodemailer from "nodemailer";
+
+enum StatusUsuario {
+  online = "online",
+  em_partida = "em_partida",
+  offline = "offline",
+  banido = "banido",
+}
+
+enum CargoUsuario {
+  adm = "adm",
+  jogador = "jogador",
+}
+>>>>>>> Stashed changes
 
 const prisma = new PrismaClient();
 
@@ -50,3 +69,133 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
+<<<<<<< Updated upstream
+=======
+
+export const cadastro = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { usuario, email, senha } = req.body;
+
+    if (!usuario || !email || !senha) {
+      res.status(400).json({ mensagem: "Todos os campos são obrigatórios." });
+      return;
+    }
+
+    const usernameRegex = /^[a-zA-Z0-9_]{3,20}$/;
+    if (!usernameRegex.test(usuario)) {
+      res.status(400).json({ mensagem: "E-mail ou usuário inválido." });
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      res.status(400).json({ mensagem: "E-mail ou usuário inválido." });
+      return;
+    }
+
+    const senhaForteRegex = /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/;
+    if (!senhaForteRegex.test(senha)) {
+      res.status(400).json({
+        mensagem: "Senha fraca, deve ter pelo menos 8 caracteres, tendo números e letras",
+      });
+      return;
+    }
+
+    const usuarioExistente = await prisma.usuario.findFirst({
+      where: {
+        OR: [
+          { nome: usuario },
+          { email: email }
+        ]
+      }
+    });
+
+    if (usuarioExistente) {
+      res.status(400).json({ mensagem: "E-mail ou usuário já cadastrado." });
+      return;
+    }
+
+    const senhaCriptografada = await criptografarString(senha);
+
+    const novoUsuario = await prisma.usuario.create({
+      data: {
+        email,
+        nome: usuario,
+        senha: senhaCriptografada,
+        moedas: 0,
+        partidas_ganhas: 0,
+        partidas_totais: 0,
+        avatar_ativo: 0,
+        fundo_ativo: 0,
+        deck_ativo: 0,
+        status: StatusUsuario.offline,
+        cargo: CargoUsuario.jogador
+      }
+    });
+
+    res.status(201).json({
+      mensagem: "Usuário cadastrado com sucesso.",
+      nome: novoUsuario.nome,
+      email: novoUsuario.email,
+      dataCriacao: novoUsuario.data_criacao.toLocaleDateString("pt-BR")
+    });
+
+  } catch (erro) {
+    console.error("Erro no cadastro:", erro);
+    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+  }
+};
+export const recuperarSenha = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { usuario, email } = req.body;
+
+    if (!usuario || !email) {
+      res.status(400).json({ mensagem: "Usuário e e-mail são obrigatórios." });
+      return;
+    }
+
+    const user = await prisma.usuario.findFirst({
+      where: { nome: usuario, email: email }
+    });
+
+    if (!user) {
+      res.status(404).json({ mensagem: "Usuário inexistente." });
+      return;
+    }
+
+    const token = gerarPasswordResetToken(user.id.toString());
+
+    const link = `http://localhost:8080/redefinir-senha?token=${token}`;
+
+    const transporter = nodemailer.createTransport({
+      host: "smtp.seuprovedor.com", // configure seu servidor SMTP aqui
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: '"POKARIBA" <no-reply@seuapp.com>',
+      to: email,
+      subject: "Recuperação de Senha",
+      html: `
+        <h2>Recuperação de Senha</h2>
+        <p>Clique no link abaixo para redefinir sua senha:</p>
+        <a href="${link}">${link}</a>
+        <p>Este link expira em 20 minutos.</p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ mensagem: "E-mail de recuperação enviado com sucesso." });
+
+  } catch (erro) {
+    console.error("Erro ao enviar e-mail de recuperação:", erro);
+    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+  }
+};
+>>>>>>> Stashed changes
