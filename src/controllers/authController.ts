@@ -31,7 +31,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const token = gerarAccessToken(user.id.toString());
-
+    res.setHeader('Access-Control-Expose-Headers', 'Authorization');
     res.setHeader("Authorization", `Bearer ${token}`);
     res.status(200).json({
       email: user.email,
