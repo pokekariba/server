@@ -1,26 +1,11 @@
 import { Request, Response } from "express";
-<<<<<<< Updated upstream
-import { PrismaClient } from '@prisma/client'
-import { gerarAccessToken } from "../utils/jwt";
-import { compararString } from "../utils/criptografia";
-=======
 import { PrismaClient } from '@prisma/client';
 import { gerarAccessToken, gerarPasswordResetToken } from "../utils/jwt";
 import { compararString, criptografarString } from "../utils/criptografia";
 import nodemailer from "nodemailer";
+import { StatusUsuario, CargoUsuario } from "@types/usuarioTypes";
 
-enum StatusUsuario {
-  online = "online",
-  em_partida = "em_partida",
-  offline = "offline",
-  banido = "banido",
-}
 
-enum CargoUsuario {
-  adm = "adm",
-  jogador = "jogador",
-}
->>>>>>> Stashed changes
 
 const prisma = new PrismaClient();
 
@@ -69,8 +54,6 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
-<<<<<<< Updated upstream
-=======
 
 export const cadastro = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -87,7 +70,7 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = ^[^\s@]+@[^\s@]+.[^\s@.]+$;
     if (!emailRegex.test(email)) {
       res.status(400).json({ mensagem: "E-mail ou usuário inválido." });
       return;
@@ -133,12 +116,9 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
       }
     });
 
-    res.status(201).json({
-      mensagem: "Usuário cadastrado com sucesso.",
-      nome: novoUsuario.nome,
-      email: novoUsuario.email,
-      dataCriacao: novoUsuario.data_criacao.toLocaleDateString("pt-BR")
-    });
+    // Retornando apenas status 200, sem corpo
+        res.sendStatus(200);
+
 
   } catch (erro) {
     console.error("Erro no cadastro:", erro);
@@ -198,4 +178,3 @@ export const recuperarSenha = async (req: Request, res: Response): Promise<void>
     res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
->>>>>>> Stashed changes
