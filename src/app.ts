@@ -1,6 +1,5 @@
 import helloRoutes from "./routes/hello";
 import express from "express";
-import cors from "cors";
 import protegidas from "./routes/protegidas";
 import { autenticador } from "./middleware/autenticador.middleware";
 import authRoutes from "./routes/authRoutes";
@@ -11,7 +10,8 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
 
   if (req.method === 'OPTIONS') {
-    return res.sendStatus(200); // responde o preflight diretamente
+    res.sendStatus(200);
+    return;
   }
 
   next();
