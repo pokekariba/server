@@ -1,19 +1,9 @@
 import { Request, Response } from "express";
 import { PrismaClient } from '@prisma/client';
-import { gerarAccessToken } from "../utils/jwt";
+import { gerarAccessToken, gerarPasswordResetToken } from "../utils/jwt";
 import { compararString, criptografarString } from "../utils/criptografia";
-
-enum StatusUsuario {
-  online = "online",
-  em_partida = "em_partida",
-  offline = "offline",
-  banido = "banido",
-}
-
-enum CargoUsuario {
-  adm = "adm",
-  jogador = "jogador",
-}
+import nodemailer from "nodemailer";
+import { StatusUsuario, CargoUsuario } from "@types/usuarioTypes";
 
 const prisma = new PrismaClient();
 
@@ -78,7 +68,8 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+.[^\s@.]+$/;
+
     if (!emailRegex.test(email)) {
       res.status(400).json({ mensagem: "E-mail ou usuário inválido." });
       return;
@@ -123,16 +114,63 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
         cargo: CargoUsuario.jogador
       }
     });
-
-    res.status(201).json({
-      mensagem: "Usuário cadastrado com sucesso.",
-      nome: novoUsuario.nome,
-      email: novoUsuario.email,
-      dataCriacao: novoUsuario.data_criacao.toLocaleDateString("pt-BR")
-    });
+        res.sendStatus(200);
 
   } catch (erro) {
     console.error("Erro no cadastro:", erro);
+    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+  }
+};
+export const recuperarSenha = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const { usuario, email } = req.body;
+
+    if (!usuario || !email) {
+      res.status(400).json({ mensagem: "Usuário e e-mail são obrigatórios." });
+      return;
+    }
+
+    const user = await prisma.usuario.findFirst({
+      where: { nome: usuario, email: email }
+    });
+
+    if (!user) {
+      res.status(404).json({ mensagem: "Usuário inexistente." });
+      return;
+    }
+
+    const token = gerarPasswordResetToken(user.id.toString());
+
+    const link = `http://localhost:8080/redefinir-senha?token=${token}`;
+
+    const transporter = nodemailer.createTransport({
+      host: "smtp.seuprovedor.com", // configure seu servidor SMTP aqui
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: '"POKARIBA" <no-reply@seuapp.com>',
+      to: email,
+      subject: "Recuperação de Senha",
+      html: `
+        <h2>Recuperação de Senha</h2>
+        <p>Clique no link abaixo para redefinir sua senha:</p>
+        <a href="${link}">${link}</a>
+        <p>Este link expira em 20 minutos.</p>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    res.status(200).json({ mensagem: "E-mail de recuperação enviado com sucesso." });
+
+  } catch (erro) {
+    console.error("Erro ao enviar e-mail de recuperação:", erro);
     res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
