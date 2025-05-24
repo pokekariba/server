@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { PrismaClient } from '@prisma/client';
-import { gerarAccessToken, gerarPasswordResetToken } from "../utils/jwt";
+import { gerarAccessToken, gerarPasswordResetToken, verificarToken } from "../utils/jwt";
 import { compararString, criptografarString } from "../utils/criptografia";
 import nodemailer from "nodemailer";
-import { StatusUsuario, CargoUsuario } from "@types/usuarioTypes";
+import { StatusUsuario, CargoUsuario } from "../@types/usuarioTypes";
 
 const prisma = new PrismaClient();
 
