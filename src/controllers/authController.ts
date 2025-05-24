@@ -5,18 +5,16 @@ import { compararString, criptografarString } from "../utils/criptografia";
 import nodemailer from "nodemailer";
 import { StatusUsuario, CargoUsuario } from "@types/usuarioTypes";
 
-
-
 const prisma = new PrismaClient();
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { usuario, senha } = req.body;
-    
+
     const user = await prisma.usuario.findFirst({
       where: { nome: usuario }
     });
-    
+
     if (!user) {
       res.status(404).json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
       return;
@@ -29,13 +27,13 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    if (user.status === "banido") {
+    if (user.status === StatusUsuario.banido) {
       res.status(403).json({ mensagem: "Usuário banido." });
       return;
     }
 
     const token = gerarAccessToken(user.id.toString());
-
+    res.setHeader('Access-Control-Expose-Headers', 'Authorization');
     res.setHeader("Authorization", `Bearer ${token}`);
     res.status(200).json({
       email: user.email,
@@ -70,7 +68,8 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const emailRegex = ^[^\s@]+@[^\s@]+.[^\s@.]+$;
+    const emailRegex = /^[^\s@]+@[^\s@]+.[^\s@.]+$/;
+
     if (!emailRegex.test(email)) {
       res.status(400).json({ mensagem: "E-mail ou usuário inválido." });
       return;
@@ -115,10 +114,7 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
         cargo: CargoUsuario.jogador
       }
     });
-
-    // Retornando apenas status 200, sem corpo
         res.sendStatus(200);
-
 
   } catch (erro) {
     console.error("Erro no cadastro:", erro);
