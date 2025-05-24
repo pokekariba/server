@@ -33,7 +33,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     }
 
     const token = gerarAccessToken(user.id.toString());
-    res.setHeader('Access-Control-Expose-Headers', 'Authorization');
+
     res.setHeader("Authorization", `Bearer ${token}`);
     res.status(200).json({
       email: user.email,
@@ -114,8 +114,9 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
         cargo: CargoUsuario.jogador
       }
     });
-        res.sendStatus(200);
 
+        res.sendStatus(200);
+    
   } catch (erro) {
     console.error("Erro no cadastro:", erro);
     res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
@@ -171,6 +172,69 @@ export const recuperarSenha = async (req: Request, res: Response): Promise<void>
 
   } catch (erro) {
     console.error("Erro ao enviar e-mail de recuperação:", erro);
+    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+  }
+};
+
+export const redefinirSenha = async (req: Request, res: Response): Promise<void> => {
+  try {
+    const tokenHeader = req.headers.authorization;
+
+    if (!tokenHeader || !tokenHeader.startsWith("Bearer ")) {
+      res.status(403).json({ mensagem: "Token inválido ou expirado." });
+      return;
+    }
+
+    const token = tokenHeader.split(" ")[1];
+
+    let payload;
+    try {
+      payload = verificarToken(token);
+    } catch (erro) {
+      res.status(403).json({ mensagem: "Token inválido ou expirado." });
+      return;
+    }
+
+    if (payload.tipo !== "reset") {
+      res.status(403).json({ mensagem: "Token inválido ou expirado." });
+      return;
+    }
+
+    const { usuario, novaSenha } = req.body;
+
+    if (!usuario || !novaSenha) {
+      res.status(400).json({ mensagem: "Usuário e nova senha são obrigatórios." });
+      return;
+    }
+
+    const senhaForteRegex = /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/;
+    if (!senhaForteRegex.test(novaSenha)) {
+      res.status(400).json({
+        mensagem: "Senha fraca, deve ter pelo menos 8 caracteres, tendo números e letras",
+      });
+      return;
+    }
+
+    const user = await prisma.usuario.findFirst({
+      where: { nome: usuario }
+    });
+
+    if (!user) {
+      res.status(404).json({ mensagem: "Usuário inexistente." });
+      return;
+    }
+
+    const senhaCriptografada = await criptografarString(novaSenha);
+
+    await prisma.usuario.update({
+      where: { id: user.id },
+      data: { senha: senhaCriptografada }
+    });
+
+    res.sendStatus(200);
+
+  } catch (erro) {
+    console.error("Erro ao redefinir senha:", erro);
     res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
