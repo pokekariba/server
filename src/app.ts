@@ -5,7 +5,11 @@ import protegidas from "./routes/protegidas";
 import { autenticador } from "./middleware/autenticador.middleware";
 import authRoutes from "./routes/authRoutes";
 const app = express();
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:8080',
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 app.use(helloRoutes);
 app.use('/jogo',autenticador,protegidas);
