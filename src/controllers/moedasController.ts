@@ -12,18 +12,8 @@ export async function moedas(req: Request, res: Response) {
       return;
     }
 
-    // Pega o id do usuário do token (setado pelo middleware autenticador)
-    const usuarioId = res.locals.usuario.id;
-
-    // Busca o usuário no banco
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: Number(usuarioId) },
-    });
-
-    if (!usuario) {
-      res.status(404).json({ mensagem: "Usuário não encontrado." });
-      return;
-    }
+    // Usuário já está disponível via middleware
+    const usuario = res.locals.usuario;
 
     // Atualiza as moedas do usuário
     const novoSaldo = usuario.moedas + quantidade;
@@ -33,10 +23,9 @@ export async function moedas(req: Request, res: Response) {
       data: { moedas: novoSaldo },
     });
 
-    // Retorna o novo saldo de moedas
     res.status(200).json({ moedasAtuais: novoSaldo });
   } catch (error) {
     console.error("Erro ao comprar moedas:", error);
-    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+    res.status(500).json({ mensagem: "Erro interno, tente novamente mais tarde." });
   }
 }

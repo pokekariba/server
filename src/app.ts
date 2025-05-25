@@ -3,6 +3,8 @@ import express from "express";
 import protegidas from "./routes/protegidas";
 import { autenticador } from "./middleware/autenticador.middleware";
 import authRoutes from "./routes/authRoutes";
+
+
 const app = express();
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', 'http://localhost:8080');
@@ -20,4 +22,5 @@ app.use(express.json());
 app.use(helloRoutes);
 app.use('/jogo',autenticador,protegidas);
 app.use(authRoutes);
+
 export default app;
