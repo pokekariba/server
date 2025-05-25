@@ -4,6 +4,8 @@ import { Router } from "express";
 import { autenticador } from "../middleware/autenticador.middleware";
 import backofficeRoutes from './backofficeRoutes';
 import comprarRoutes from "./comprarRoutes";
+import listarRoutes from "./listarRoutes";
+
 const router = Router();
 
 // Rota protegida por JWT
@@ -15,5 +17,7 @@ router.get("/rota-protegida", autenticador, (req, res) => {
 router.use('/backoffice',backofficeRoutes);
 
 router.use(comprarRoutes);
+
+router.use('/backoffice', listarRoutes);
 
 export default router;
