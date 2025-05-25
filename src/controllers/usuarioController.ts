@@ -7,12 +7,10 @@ export const banirUsuario = async (req: Request, res: Response) => {
   const { idUsuario } = req.body;
 
   try {
-    // Verifica se o usuário existe
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: Number(idUsuario) },
-    });
+    const usuario = res.locals.usuario;
 
-    if (!usuario) {
+    // Valida se o usuário está disponível e corresponde ao ID recebido
+    if (!usuario || usuario.id !== Number(idUsuario)) {
       return res.status(404).json({ mensagem: "Usuário não encontrado." });
     }
 
@@ -23,7 +21,7 @@ export const banirUsuario = async (req: Request, res: Response) => {
         : StatusUsuario.banido;
 
     const usuarioAtualizado = await prisma.usuario.update({
-      where: { id: Number(idUsuario) },
+      where: { id: usuario.id },
       data: { status: novoStatus },
     });
 
