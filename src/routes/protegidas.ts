@@ -14,10 +14,12 @@ router.get("/rota-protegida", autenticador, (req, res) => {
 });
 
 // Rota protegida apenas para administradores
-router.use('/backoffice',backofficeRoutes);
+router.use('/backoffice', backofficeRoutes);
 
 router.use(comprarRoutes);
 
 router.use('/backoffice', listarRoutes);
+
+router.use("/backoffice", autenticador, backofficeRoutes);
 
 export default router;
