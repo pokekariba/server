@@ -7,10 +7,19 @@ export const banirUsuario = async (req: Request, res: Response) => {
   const { idUsuario } = req.body;
 
   try {
-    const usuario = res.locals.usuario;
+    const admin = res.locals.usuario;
 
-    // Valida se o usuário está disponível e corresponde ao ID recebido
-    if (!usuario || usuario.id !== Number(idUsuario)) {
+    // Verifica se quem está fazendo a requisição é um administrador
+    if (!admin || admin.cargo !== "adm") {
+      return res.status(403).json({ mensagem: "Acesso negado. Apenas administradores podem banir usuários." });
+    }
+
+    // Busca o usuário que será banido
+    const usuario = await prisma.usuario.findUnique({
+      where: { id: Number(idUsuario) },
+    });
+
+    if (!usuario) {
       return res.status(404).json({ mensagem: "Usuário não encontrado." });
     }
 
@@ -26,19 +35,16 @@ export const banirUsuario = async (req: Request, res: Response) => {
     });
 
     return res.status(200).json({
-      usuarios: [
-        {
-          id: usuarioAtualizado.id,
-          email: usuarioAtualizado.email,
-          nome: usuarioAtualizado.nome,
-          status: usuarioAtualizado.status,
-        },
-      ],
+      mensagem: `Usuário ${novoStatus === "banido" ? "banido" : "desbanido"} com sucesso.`,
+      usuario: {
+        id: usuarioAtualizado.id,
+        nome: usuarioAtualizado.nome,
+        email: usuarioAtualizado.email,
+        status: usuarioAtualizado.status,
+      },
     });
   } catch (error) {
     console.error("Erro ao banir usuário:", error);
-    return res
-      .status(500)
-      .json({ mensagem: "Erro interno, tente novamente mais tarde." });
+    return res.status(500).json({ mensagem: "Erro interno. Tente novamente mais tarde." });
   }
 };
