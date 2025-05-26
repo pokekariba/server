@@ -6,6 +6,7 @@ import { banirUsuario } from "../controllers/usuarioController";
 
 const router = Router();
 
+router.use(listarRoutes);
 router.post('/banir-usuario', banirUsuario);
 router.post('/adicionar-item',adicionarItem);
 router.put("/editar-item", editarItemLoja);
