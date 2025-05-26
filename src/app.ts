@@ -1,9 +1,10 @@
 import helloRoutes from "./routes/hello";
+import protegidasRoutes from "./routes/protegidas"; // protegidas
 import express from "express";
 import protegidas from "./routes/protegidas";
 import { autenticador } from "./middleware/autenticador.middleware";
 import authRoutes from "./routes/authRoutes";
-
+import imagemItemRoutes from "./routes/backoffice/imagemItem";
 
 const app = express();
 app.use((req, res, next) => {
@@ -19,8 +20,9 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json());
-app.use(helloRoutes);
 app.use('/jogo',autenticador,protegidas);
 app.use(authRoutes);
 
 export default app;
+
+
