@@ -1,7 +1,9 @@
-import { TokenPayload } from "./../@types/TokenPayload";
+import { env } from '../config/env';
+import { TokenPayload } from './../@types/TokenPayload';
+
 import jwt from "jsonwebtoken";
 
-const JWT_SECRET = process.env.JWT_SECRET as string; // ideal configurar no .env
+const JWT_SECRET = env.jwtSecret; // ideal configurar no .env
 
 export function gerarAccessToken(id: string): string {
   // ✔️ Token com validade de 15 minutos e tipo "access"

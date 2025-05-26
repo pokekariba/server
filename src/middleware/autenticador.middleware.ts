@@ -37,7 +37,7 @@ export async function autenticador(req: Request, res: Response, next: NextFuncti
     res.setHeader("x-renewed-token", novoToken);
 
     // Adiciona o payload no request para uso posterior
-    res.locals.usuario = payload;
+    res.locals.usuario = usuario;
 
     next();
   } catch (err: any) {
