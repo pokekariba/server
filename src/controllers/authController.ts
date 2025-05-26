@@ -1,6 +1,10 @@
 import { Request, Response } from "express";
-import { PrismaClient } from '@prisma/client';
-import { gerarAccessToken, gerarPasswordResetToken, verificarToken } from "../utils/jwt";
+import { PrismaClient } from "@prisma/client";
+import {
+  gerarAccessToken,
+  gerarPasswordResetToken,
+  verificarToken,
+} from "../utils/jwt";
 import { compararString, criptografarString } from "../utils/criptografia";
 import nodemailer from "nodemailer";
 import { StatusUsuario, CargoUsuario } from "../@types/usuarioTypes";
@@ -12,18 +16,22 @@ export const login = async (req: Request, res: Response): Promise<void> => {
     const { usuario, senha } = req.body;
 
     const user = await prisma.usuario.findFirst({
-      where: { nome: usuario }
+      where: { nome: usuario },
     });
 
     if (!user) {
-      res.status(404).json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
+      res
+        .status(404)
+        .json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
       return;
     }
 
     const senhaValida = await compararString(senha, user.senha);
 
     if (!senhaValida) {
-      res.status(404).json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
+      res
+        .status(404)
+        .json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
       return;
     }
 
@@ -44,22 +52,31 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       partidasTotais: user.partidas_totais,
       avatarAtivo: user.avatar_ativo,
       fundoAtivo: user.fundo_ativo,
-      baralhoAtivo: user.deck_ativo
+      baralhoAtivo: user.deck_ativo,
     });
-
   } catch (erro) {
     console.error("Erro no login:", erro);
-    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+    res
+      .status(500)
+      .json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
 
-export const loginBackoffice = async (req: Request, res: Response): Promise<void> => {
+export const loginBackoffice = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-    const user = res.locals.usuario;
-    const { senha } = req.body;
+    const { usuario, senha } = req.body;
+
+    const user = await prisma.usuario.findFirst({
+      where: { nome: usuario },
+    });
 
     if (!user) {
-      res.status(404).json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
+      res
+        .status(404)
+        .json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
       return;
     }
 
@@ -72,7 +89,9 @@ export const loginBackoffice = async (req: Request, res: Response): Promise<void
     // Verifica a senha com o hash do usuário já carregado
     const senhaValida = await compararString(senha, user.senha);
     if (!senhaValida) {
-      res.status(404).json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
+      res
+        .status(404)
+        .json({ mensagem: "Usuário inexistente ou credenciais incorretas." });
       return;
     }
 
@@ -86,16 +105,13 @@ export const loginBackoffice = async (req: Request, res: Response): Promise<void
     const token = gerarAccessToken(user.id.toString());
 
     // Configura o header da resposta
-    res.setHeader('Access-Control-Expose-Headers', 'Authorization');
+    res.setHeader("Access-Control-Expose-Headers", "Authorization");
     res.setHeader("Authorization", `Bearer ${token}`);
-
-    
     res.sendStatus(200);
-
   } catch (erro) {
     console.error("Erro no login backoffice:", erro);
   }
-}
+};
 
 export const cadastro = async (req: Request, res: Response): Promise<void> => {
   try {
@@ -122,18 +138,16 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
     const senhaForteRegex = /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/;
     if (!senhaForteRegex.test(senha)) {
       res.status(400).json({
-        mensagem: "Senha fraca, deve ter pelo menos 8 caracteres, tendo números e letras",
+        mensagem:
+          "Senha fraca, deve ter pelo menos 8 caracteres, tendo números e letras",
       });
       return;
     }
 
     const usuarioExistente = await prisma.usuario.findFirst({
       where: {
-        OR: [
-          { nome: usuario },
-          { email: email }
-        ]
-      }
+        OR: [{ nome: usuario }, { email: email }],
+      },
     });
 
     if (usuarioExistente) {
@@ -155,18 +169,22 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
         fundo_ativo: 0,
         deck_ativo: 0,
         status: StatusUsuario.offline,
-        cargo: CargoUsuario.jogador
-      }
+        cargo: CargoUsuario.jogador,
+      },
     });
 
-        res.sendStatus(200);
-    
+    res.sendStatus(200);
   } catch (erro) {
     console.error("Erro no cadastro:", erro);
-    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+    res
+      .status(500)
+      .json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
-export const recuperarSenha = async (req: Request, res: Response): Promise<void> => {
+export const recuperarSenha = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { usuario, email } = req.body;
 
@@ -176,7 +194,7 @@ export const recuperarSenha = async (req: Request, res: Response): Promise<void>
     }
 
     const user = await prisma.usuario.findFirst({
-      where: { nome: usuario, email: email }
+      where: { nome: usuario, email: email },
     });
 
     if (!user) {
@@ -194,8 +212,8 @@ export const recuperarSenha = async (req: Request, res: Response): Promise<void>
       secure: false,
       auth: {
         user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
+        pass: process.env.EMAIL_PASS,
+      },
     });
 
     const mailOptions = {
@@ -207,20 +225,26 @@ export const recuperarSenha = async (req: Request, res: Response): Promise<void>
         <p>Clique no link abaixo para redefinir sua senha:</p>
         <a href="${link}">${link}</a>
         <p>Este link expira em 20 minutos.</p>
-      `
+      `,
     };
 
     await transporter.sendMail(mailOptions);
 
-    res.status(200).json({ mensagem: "E-mail de recuperação enviado com sucesso." });
-
+    res
+      .status(200)
+      .json({ mensagem: "E-mail de recuperação enviado com sucesso." });
   } catch (erro) {
     console.error("Erro ao enviar e-mail de recuperação:", erro);
-    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+    res
+      .status(500)
+      .json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
 
-export const redefinirSenha = async (req: Request, res: Response): Promise<void> => {
+export const redefinirSenha = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const tokenHeader = req.headers.authorization;
 
@@ -247,20 +271,23 @@ export const redefinirSenha = async (req: Request, res: Response): Promise<void>
     const { usuario, novaSenha } = req.body;
 
     if (!usuario || !novaSenha) {
-      res.status(400).json({ mensagem: "Usuário e nova senha são obrigatórios." });
+      res
+        .status(400)
+        .json({ mensagem: "Usuário e nova senha são obrigatórios." });
       return;
     }
 
     const senhaForteRegex = /^(?=.*[a-zA-Z])(?=.*\d).{8,}$/;
     if (!senhaForteRegex.test(novaSenha)) {
       res.status(400).json({
-        mensagem: "Senha fraca, deve ter pelo menos 8 caracteres, tendo números e letras",
+        mensagem:
+          "Senha fraca, deve ter pelo menos 8 caracteres, tendo números e letras",
       });
       return;
     }
 
     const user = await prisma.usuario.findFirst({
-      where: { nome: usuario }
+      where: { nome: usuario },
     });
 
     if (!user) {
@@ -272,13 +299,14 @@ export const redefinirSenha = async (req: Request, res: Response): Promise<void>
 
     await prisma.usuario.update({
       where: { id: user.id },
-      data: { senha: senhaCriptografada }
+      data: { senha: senhaCriptografada },
     });
 
     res.sendStatus(200);
-
   } catch (erro) {
     console.error("Erro ao redefinir senha:", erro);
-    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+    res
+      .status(500)
+      .json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
