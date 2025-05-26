@@ -12,6 +12,6 @@ router.use('/backoffice',backofficeRoutes);
 router.use(comprarRoutes);
 router.use("/loja", lojaRoutes);
 
-router.use("/backoffice", autenticador, backofficeRoutes);
+router.use("/backoffice", backofficeRoutes);
 
 export default router;
