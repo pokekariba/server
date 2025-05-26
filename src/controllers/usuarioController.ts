@@ -13,7 +13,8 @@ export const banirUsuario = async (req: Request, res: Response) => {
     });
 
     if (!usuario) {
-      return res.status(404).json({ mensagem: "Usuário não encontrado." });
+      res.status(404).json({ mensagem: "Usuário não encontrado." });
+      return;
     }
 
     // Alterna o status entre "banido" e "offline"
@@ -27,7 +28,7 @@ export const banirUsuario = async (req: Request, res: Response) => {
       data: { status: novoStatus },
     });
 
-    return res.status(200).json({
+    res.status(200).json({
       mensagem: `Usuário ${novoStatus === "banido" ? "banido" : "desbanido"} com sucesso.`,
       usuario: {
         id: usuarioAtualizado.id,
@@ -38,6 +39,9 @@ export const banirUsuario = async (req: Request, res: Response) => {
     });
   } catch (error) {
     console.error("Erro ao banir usuário:", error);
-    return res.status(500).json({ mensagem: "Erro interno. Tente novamente mais tarde." });
+    res
+      .status(500)
+      .json({ mensagem: "Erro interno. Tente novamente mais tarde." });
+    return;
   }
 };

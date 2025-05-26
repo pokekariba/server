@@ -1,15 +1,23 @@
 import { Router } from "express";
-import listarRoutes from "./listarRoutes";
 import { editarItemLoja } from "../controllers/editarController";
 import { adicionarItem } from "../controllers/itemController";
 import { banirUsuario } from "../controllers/usuarioController";
-import { loginBackoffice } from "../controllers/authController";
+import { listarItensLoja } from "../controllers/listarController";
+import multer from "multer";
+import { adicionarImagemItem } from "../controllers/imageController";
 
 const router = Router();
+const storage = multer.memoryStorage();
+const upload = multer({ storage });
 
-router.use(listarRoutes);
-router.post('/banir-usuario', banirUsuario);
-router.post('/adicionar-item',adicionarItem);
+router.post("/loja", listarItensLoja);
+router.post("/banir-usuario", banirUsuario);
+router.post("/adicionar-item", adicionarItem);
 router.put("/editar-item", editarItemLoja);
+router.post(
+  "/adicionar-imagem-item",
+  upload.array("imagens", 10),
+  adicionarImagemItem
+);
 
 export default router;
