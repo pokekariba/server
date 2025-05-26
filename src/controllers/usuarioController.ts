@@ -7,13 +7,6 @@ export const banirUsuario = async (req: Request, res: Response) => {
   const { idUsuario } = req.body;
 
   try {
-    const admin = res.locals.usuario;
-
-    // Verifica se quem está fazendo a requisição é um administrador
-    if (!admin || admin.cargo !== "adm") {
-      return res.status(403).json({ mensagem: "Acesso negado. Apenas administradores podem banir usuários." });
-    }
-
     // Busca o usuário que será banido
     const usuario = await prisma.usuario.findUnique({
       where: { id: Number(idUsuario) },
