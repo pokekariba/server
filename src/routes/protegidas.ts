@@ -20,6 +20,4 @@ router.use(comprarRoutes);
 
 router.use('/backoffice', listarRoutes);
 
-router.use("/backoffice", autenticador, backofficeRoutes);
-
 export default router;
