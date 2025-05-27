@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../config/prisma.config";
 
 export async function moedas(req: Request, res: Response) {
   try {
@@ -26,6 +24,8 @@ export async function moedas(req: Request, res: Response) {
     res.status(200).json({ moedasAtuais: novoSaldo });
   } catch (error) {
     console.error("Erro ao comprar moedas:", error);
-    res.status(500).json({ mensagem: "Erro interno, tente novamente mais tarde." });
+    res
+      .status(500)
+      .json({ mensagem: "Erro interno, tente novamente mais tarde." });
   }
 }

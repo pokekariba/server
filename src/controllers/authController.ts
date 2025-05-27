@@ -1,5 +1,4 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
 import {
   gerarAccessToken,
   gerarPasswordResetToken,
@@ -8,8 +7,7 @@ import {
 import { compararString, criptografarString } from "../utils/criptografia";
 import nodemailer from "nodemailer";
 import { StatusUsuario, CargoUsuario } from "../@types/usuarioTypes";
-
-const prisma = new PrismaClient();
+import { prisma } from "../config/prisma.config";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {

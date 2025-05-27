@@ -1,11 +1,12 @@
 import { Request, Response, NextFunction } from "express";
 import { gerarAccessToken, verificarToken } from "../utils/jwt";
-import { PrismaClient } from '@prisma/client'
+import { prisma } from "../config/prisma.config";
 
-
-const prisma = new PrismaClient();
-
-export async function autenticador(req: Request, res: Response, next: NextFunction) {
+export async function autenticador(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
   const authHeader = req.headers.authorization;
 
   if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -20,7 +21,7 @@ export async function autenticador(req: Request, res: Response, next: NextFuncti
     const usuario = await prisma.usuario.findUnique({
       where: {
         id: +payload.id,
-      }
+      },
     });
     if (!usuario) {
       res.status(401).json({ mensagem: "Usuário não encontrado" });
@@ -29,7 +30,7 @@ export async function autenticador(req: Request, res: Response, next: NextFuncti
     // Verificação de rota /backoffice e cargo do usuário
     if (req.path.startsWith("/backoffice") && usuario.cargo !== "adm") {
       res.status(401).json({ mensagem: "Usuário não autorizado" });
-      return
+      return;
     }
 
     // Gera novo token com +15min
@@ -42,7 +43,9 @@ export async function autenticador(req: Request, res: Response, next: NextFuncti
     next();
   } catch (err: any) {
     if (err.name === "TokenExpiredError") {
-      res.status(401).json({ mensagem: "Sessão expirada, faça login novamente" });
+      res
+        .status(401)
+        .json({ mensagem: "Sessão expirada, faça login novamente" });
       return;
     }
 

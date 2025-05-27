@@ -37,6 +37,7 @@ export function setupSocketIO(server: HttpServer) {
         reconexao: true,
       });
     } else {
+      socket.join("usuarios_online");
       emitEvent(socket, io, SocketServerEventsEnum.LISTAR_PARTIDAS, {
         to: TargetEventEnum.CLIENT,
       });

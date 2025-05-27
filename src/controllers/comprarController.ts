@@ -1,11 +1,13 @@
 import { Request, Response } from "express";
-import { PrismaClient, Usuario } from '@prisma/client';
+import { Usuario } from "@prisma/client";
+import { prisma } from "../config/prisma.config";
 
-const prisma = new PrismaClient();
-
-export const comprarItem = async (req: Request, res: Response): Promise<void> => {
+export const comprarItem = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
-    const usuarioId = res.locals.usuario.id;  // ID do usuário extraído do JWT no middleware
+    const usuarioId = res.locals.usuario.id; // ID do usuário extraído do JWT no middleware
     const { itemId } = req.body;
 
     if (!itemId || typeof itemId !== "number") {
@@ -18,7 +20,7 @@ export const comprarItem = async (req: Request, res: Response): Promise<void> =>
 
     // Buscar item na loja
     const item = await prisma.itemLoja.findUnique({
-      where: { id: itemId }
+      where: { id: itemId },
     });
 
     if (!item) {
@@ -27,24 +29,28 @@ export const comprarItem = async (req: Request, res: Response): Promise<void> =>
     }
 
     if (item.disponibilidade !== "disponivel") {
-      res.status(409).json({ mensagem: "Item não esta mais disponível na loja." });
+      res
+        .status(409)
+        .json({ mensagem: "Item não esta mais disponível na loja." });
       return;
     }
 
     const jaPossui = await prisma.itemUsuario.findFirst({
-        where: {
-          usuario_id: usuarioId,
-          item_loja_id: itemId
-        }
-      });
-  
-      if (jaPossui) {
-        res.status(409).json({ mensagem: "Usuário já possui este item." });
-        return;
-      }
+      where: {
+        usuario_id: usuarioId,
+        item_loja_id: itemId,
+      },
+    });
+
+    if (jaPossui) {
+      res.status(409).json({ mensagem: "Usuário já possui este item." });
+      return;
+    }
 
     if (usuario.moedas < item.preco) {
-      res.status(402).json({ mensagem: "Saldo insuficiente para comprar o item." });
+      res
+        .status(402)
+        .json({ mensagem: "Saldo insuficiente para comprar o item." });
       return;
     }
 
@@ -54,19 +60,21 @@ export const comprarItem = async (req: Request, res: Response): Promise<void> =>
     await prisma.$transaction([
       prisma.usuario.update({
         where: { id: usuarioId },
-        data: { moedas: novoSaldo }
+        data: { moedas: novoSaldo },
       }),
       prisma.itemUsuario.create({
         data: {
           usuario_id: usuarioId,
-          item_loja_id: itemId
-        }
-      })
+          item_loja_id: itemId,
+        },
+      }),
     ]);
 
     res.status(200).json({ saldoAtual: novoSaldo });
   } catch (erro) {
     console.error("Erro ao comprar item:", erro);
-    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+    res
+      .status(500)
+      .json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
