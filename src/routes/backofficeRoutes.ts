@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { editarItemLoja } from "../controllers/editarController";
 import { adicionarItem } from "../controllers/itemController";
-import { banirUsuario } from "../controllers/usuarioController";
+import { banirUsuario, listarUsuarios } from "../controllers/usuarioController";
 import { listarItensLoja } from "../controllers/listarController";
 import multer from "multer";
 import { adicionarImagemItem } from "../controllers/imageController";
@@ -19,5 +19,6 @@ router.post(
   upload.array("imagens", 10),
   adicionarImagemItem
 );
+router.post("/usuarios", listarUsuarios);
 
 export default router;
