@@ -1,6 +1,5 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
 }
 
 datasource db {
@@ -13,6 +12,13 @@ enum StatusUsuario {
   em_partida
   offline
   banido
+}
+
+enum TipoCarta {
+  mao
+  mesa
+  baralho
+  capturado
 }
 
 enum CargoUsuario {
@@ -85,7 +91,7 @@ model Carta {
   jogadorPartida      JogadorPartida?  @relation(fields: [jogador_partida_id], references: [id])
   jogador_partida_id  Int?
   valor               Int
-  tipo                String
+  tipo                TipoCarta
   quantidade          Int
 }
 
