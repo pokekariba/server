@@ -43,7 +43,7 @@ export async function adicionarItem(req: Request, res: Response) {
       return;
     }
 
-    await prisma.itemLoja.create({
+    const item = await prisma.itemLoja.create({
       data: {
         nome,
         tipo: tipo as TipoItemLoja,
@@ -52,7 +52,7 @@ export async function adicionarItem(req: Request, res: Response) {
       },
     });
 
-    res.sendStatus(200);
+    res.status(200).json(item);
   } catch (error) {
     console.error("Erro ao adicionar item:", error);
     res
