@@ -1,4 +1,10 @@
-import { Carta, JogadorPartida, Partida, Usuario } from "@prisma/client";
+import {
+  Carta,
+  JogadorPartida,
+  Partida,
+  Prisma,
+  Usuario,
+} from "@prisma/client";
 import { SocketClientEventsEnum, SocketServerEventsEnum } from "./SocketEvents";
 
 export interface SocketClientEventsData {
@@ -29,7 +35,11 @@ export interface SocketServerEventsData {
     idPartida: string;
     rodada: number;
     tabuleiro: Carta[];
-    jogadores: JogadorPartida;
+    jogadores: Prisma.JogadorPartidaGetPayload<{
+      include: {
+        cartas: true;
+      };
+    }>[];
     jogada: Carta | null;
     baralho: number;
   };
