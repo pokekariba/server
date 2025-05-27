@@ -1,11 +1,11 @@
+// src/controllers/backoffice/listarUsuarios.ts
 import { Request, Response } from "express";
-import { listarUsuarios } from "../../mocks/usuarioMock"; // usando mock!
+import { prisma } from "../../prisma/client";
 
 export const listarUsuariosController = async (req: Request, res: Response) => {
   try {
     const { email = "", nome = "" } = req.body;
 
-    // Validações:
     if (typeof email !== "string") {
       return res
         .status(400)
@@ -18,7 +18,18 @@ export const listarUsuariosController = async (req: Request, res: Response) => {
         .json({ message: "Campo NOME invalido, tente novamente." });
     }
 
-    const usuarios = await listarUsuarios(nome, email);
+    const usuarios = await prisma.usuario.findMany({
+      where: {
+        nome: { contains: nome, mode: "insensitive" },
+        email: { contains: email, mode: "insensitive" },
+      },
+      select: {
+        id: true,
+        nome: true,
+        email: true,
+        status: true,
+      },
+    });
 
     return res.status(200).json({ usuarios });
   } catch (error) {
