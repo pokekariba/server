@@ -1,21 +1,22 @@
-// src/controllers/backoffice/listarUsuarios.ts
 import { Request, Response } from "express";
 import { prisma } from "../../prisma/client";
 
-export const listarUsuariosController = async (req: Request, res: Response) => {
+export const listarUsuarios = async (req: Request, res: Response) => {
   try {
     const { email = "", nome = "" } = req.body;
 
     if (typeof email !== "string") {
-      return res
+      res
         .status(400)
         .json({ message: "Campo EMAIL invalido, tente novamente." });
+      return;
     }
 
     if (typeof nome !== "string") {
-      return res
+      res
         .status(400)
         .json({ message: "Campo NOME invalido, tente novamente." });
+      return;
     }
 
     const usuarios = await prisma.usuario.findMany({
@@ -31,11 +32,13 @@ export const listarUsuariosController = async (req: Request, res: Response) => {
       },
     });
 
-    return res.status(200).json({ usuarios });
+    res.status(200).json({ usuarios });
+    return;
   } catch (error) {
     console.error(error);
-    return res
+    res
       .status(500)
       .json({ message: "Erro interno, tente novamente mais tarde." });
+    return;
   }
 };
