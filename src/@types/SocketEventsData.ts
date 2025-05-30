@@ -91,3 +91,9 @@ export type JogadoresSala = Pick<
   Usuario,
   "nome" | "avatar_ativo" | "partidas_totais" | "partidas_ganhas"
 >;
+
+export type JogadoresPartida = Prisma.JogadorPartidaGetPayload<{
+  include: {
+    cartas: true;
+  };
+}>;

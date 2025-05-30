@@ -3,67 +3,67 @@ import {
   ServerEvent,
   SocketServerEventsEnum,
 } from "../../../@types/SocketEvents";
-import { SocketServerEventsPayload } from "../../../@types/SocketEventsData";
+import {
+  JogadoresPartida,
+  SocketServerEventsPayload,
+} from "../../../@types/SocketEventsData";
+import { Socket } from 'socket.io';
 
 export const rodadaCalculadaEvent: ServerEvent<
   SocketServerEventsEnum.RODADA_CALCULADA
 > = async (socket, io, data) => {
   const sockets = await io.in(data.idPartida).fetchSockets();
 
-  let cartasJogador: Carta[] = [];
-  let cartasAdversario: Carta[] = [];
-  let pontuacaoJogador = 0;
-  let pontuacaoAdversario = 0;
-
-  for (const jogador of data.jogadores) {
-    if (jogador.id === socket.data.idUsuario) {
-      cartasJogador.concat(jogador.cartas);
-      pontuacaoJogador = jogador.pontuacao;
-    } else {
-      cartasAdversario.concat(jogador.cartas);
-      pontuacaoAdversario = jogador.pontuacao;
-    }
-  }
-
-  const { maoJogador, cartasCapturadas } = separarCartasPorTipo(cartasJogador);
-  const {
-    maoJogador: maoAdversario,
-    cartasCapturadas: cartasCapturadasAdversario,
-  } = separarCartasPorTipo(cartasAdversario);
+  const { maos, capturadas, pontuacoes } = separarInformacoesPorJogador(
+    data.jogadores
+  );
 
   for (const s of sockets) {
-    const isJogador = s.data.idUsuario === socket.data.idUsuario;
+    const isJogador = s.data.usuario.id === socket.data.usuario.id;
+    const idAdversario = isJogador ? 
+    const maoJogador = maos.get(s.data.idUsuario) || [];
+
     const payload: SocketServerEventsPayload["rodada_calculada"] = {
       tabuleiro: data.tabuleiro,
       rodada: data.rodada,
       baralho: data.baralho,
-      maoJogador: isJogador ? maoJogador : maoAdversario,
-      maoAdversario: isJogador ? maoAdversario.length : maoJogador.length,
-      jogadaAdversario: isJogador ? null : data.jogada,
-      pontuacaoJogador: isJogador ? pontuacaoJogador : pontuacaoAdversario,
-      pontuacaoAdversario: isJogador ? pontuacaoAdversario : pontuacaoJogador,
-      cartasCapturadas: isJogador
-        ? cartasCapturadas
-        : cartasCapturadasAdversario,
-      cartasCapturadasAdversario: isJogador
-        ? cartasCapturadasAdversario
-        : cartasCapturadas,
       suaVez: !isJogador,
     };
     s.emit(SocketServerEventsEnum.RODADA_CALCULADA, payload);
   }
 };
 
-const separarCartasPorTipo = (cartas: Carta[]) => {
-  let maoJogador: Carta[] = [];
-  let cartasCapturadas = new Map<number, number>();
-  for (const carta of cartas) {
-    if (carta.tipo === TipoCarta.mao) {
-      maoJogador.push(carta);
-    }
-    if (carta.tipo === TipoCarta.capturado) {
-      cartasCapturadas.set(carta.valor, carta.quantidade);
-    }
+const separarInformacoesPorJogador = (jogadores: JogadoresPartida[]) => {
+  let maos = new Map<number, Carta[]>();
+  let capturadas = new Map<number, number[]>();
+  let pontuacoes = new Map<number, number>();
+
+  for (const jogador of jogadores) {
+    const idJogador = jogador.id;
+    const { mao, capturada } = separarCartasPorTipo(jogador.cartas);
+    maos.set(idJogador, mao);
+    capturadas.set(idJogador, capturada);
+    pontuacoes.set(idJogador, jogador.pontuacao);
   }
-  return { maoJogador, cartasCapturadas };
+
+  return { maos, capturadas, pontuacoes };
 };
+
+const separarCartasPorTipo = (cartas: Carta[]) => {
+  const tipos = cartas.reduce(
+    (acc, carta) => {
+      if (carta.tipo === TipoCarta.mao) {
+        acc.mao.push(carta);
+      } else {
+        acc.capturada[carta.valor] = carta.quantidade;
+      }
+      return acc;
+    },
+    { mao: [] as Carta[], capturada: Array(9).fill(0) as number[] }
+  );
+  return tipos;
+};
+
+const buscarAdversario = (sockets: Socket[], idJogador: number) => {
+
+}
