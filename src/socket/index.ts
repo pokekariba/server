@@ -6,11 +6,14 @@ import { disconnectEvent } from "./events/client/disconnect.event";
 import { emitEvent, setupEvents } from "./events/setupEvents";
 import { SocketServerEventsEnum } from "../@types/SocketEvents";
 import { TargetEventEnum } from "../@types/SocketEventsData";
+import partidaService from "../services/partida.service";
 
 export function setupSocketIO(server: HttpServer) {
   const io = new Server(server, {
     cors: { origin: "*" },
   });
+
+  partidaService.init(io);
 
   io.use(handShakeMiddleware);
 
@@ -32,11 +35,12 @@ export function setupSocketIO(server: HttpServer) {
     socket.on("disconnect", () => disconnectEvent(socket, io));
     if (socket.data.idPartida) {
       socket.join(socket.data.idPartida);
-      emitEvent(socket, io, SocketServerEventsEnum.PARTIDA_INICIADA, {
+      emitEvent(socket, io, SocketServerEventsEnum.RODADA_CALCULADA, {
         idPartida: socket.data.idPartida,
         reconexao: true,
       });
     } else {
+      socket.join("usuarios_online");
       emitEvent(socket, io, SocketServerEventsEnum.LISTAR_PARTIDAS, {
         to: TargetEventEnum.CLIENT,
       });

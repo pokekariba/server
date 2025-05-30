@@ -1,9 +1,10 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../config/prisma.config";
 
-const prisma = new PrismaClient();
-
-export const editarItemLoja = async (req: Request, res: Response): Promise<void> => {
+export const editarItemLoja = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   try {
     const { id, nome, tipo, disponibilidade, preco } = req.body;
 
@@ -14,22 +15,33 @@ export const editarItemLoja = async (req: Request, res: Response): Promise<void>
     }
 
     if (!nome || typeof nome !== "string") {
-      res.status(400).json({ mensagem: "Campo NOME inválido, tente novamente." });
+      res
+        .status(400)
+        .json({ mensagem: "Campo NOME inválido, tente novamente." });
       return;
     }
 
     if (!tipo || !["deck", "avatar", "fundo"].includes(tipo)) {
-      res.status(400).json({ mensagem: "Campo TIPO inválido, tente novamente." });
+      res
+        .status(400)
+        .json({ mensagem: "Campo TIPO inválido, tente novamente." });
       return;
     }
 
-    if (!disponibilidade || !["disponivel", "indisponivel"].includes(disponibilidade)) {
-      res.status(400).json({ mensagem: "Campo DISPONIBILIDADE inválido, tente novamente." });
+    if (
+      !disponibilidade ||
+      !["disponivel", "indisponivel"].includes(disponibilidade)
+    ) {
+      res
+        .status(400)
+        .json({ mensagem: "Campo DISPONIBILIDADE inválido, tente novamente." });
       return;
     }
 
     if (typeof preco !== "number" || preco < 0) {
-      res.status(400).json({ mensagem: "Campo PRECO inválido, tente novamente." });
+      res
+        .status(400)
+        .json({ mensagem: "Campo PRECO inválido, tente novamente." });
       return;
     }
 
@@ -53,9 +65,10 @@ export const editarItemLoja = async (req: Request, res: Response): Promise<void>
     });
 
     res.status(200).json({ mensagem: "Item atualizado com sucesso." });
-
   } catch (erro) {
     console.error("Erro ao editar item da loja:", erro);
-    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+    res
+      .status(500)
+      .json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };

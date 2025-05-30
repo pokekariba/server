@@ -1,5 +1,6 @@
-import { Carta, JogadorPartida, Partida, Usuario } from "@prisma/client";
+import { Carta, Partida, Prisma, Usuario } from "@prisma/client";
 import { SocketClientEventsEnum, SocketServerEventsEnum } from "./SocketEvents";
+import { EstadoPartida, ResumoPartida } from "./EstadoPartida";
 
 export interface SocketClientEventsData {
   [SocketClientEventsEnum.JOGADA]: {
@@ -27,39 +28,29 @@ export interface SocketServerEventsData {
   };
   [SocketServerEventsEnum.RODADA_CALCULADA]: {
     idPartida: string;
-    rodada: number;
-    tabuleiro: Carta[];
-    jogadores: JogadorPartida;
-    jogada: Carta | null;
-    baralho: number;
+    reconexao?: boolean;
+    jogada?: Carta;
   };
   [SocketServerEventsEnum.FINAL_PARTIDA]: {
     idPartida: string;
-    vencedor: string;
-    pontuacao: Map<string, number>;
   };
   [SocketServerEventsEnum.SALA_ATUALIZADA]: {
     idPartida: string;
-    jogadores: Usuario[];
-  };
-  [SocketServerEventsEnum.PARTIDA_INICIADA]: {
-    idPartida: string;
-    reconexao?: boolean;
   };
 }
 
 export interface SocketServerEventsPayload {
   [SocketServerEventsEnum.LISTAR_PARTIDAS]: {
-    partidas: Pick<Partida, "id" | "nome" | "vagas">[];
+    partidas: ResumoPartida[];
   };
   [SocketServerEventsEnum.RODADA_CALCULADA]: {
     rodada: number;
     tabuleiro: Carta[];
-    jogadaAdversario: Carta | null;
+    jogadaAdversario?: Carta;
     pontuacaoJogador: number;
     pontuacaoAdversario: number;
-    cartasCapturadas: Map<number, number>;
-    cartasCapturadasAdversario: Map<number, number>;
+    cartasCapturadas: number[];
+    cartasCapturadasAdversario: number[];
     baralho: number;
     maoJogador: Carta[];
     maoAdversario: number;
@@ -71,11 +62,6 @@ export interface SocketServerEventsPayload {
   };
   [SocketServerEventsEnum.SALA_ATUALIZADA]: {
     jogadores: JogadoresSala[];
-  };
-  [SocketServerEventsEnum.PARTIDA_INICIADA]: {
-    baralho: number;
-    maoJogador: Carta[];
-    suaVez: boolean;
   };
 }
 

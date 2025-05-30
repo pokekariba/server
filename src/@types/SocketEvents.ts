@@ -18,7 +18,6 @@ export enum SocketServerEventsEnum {
   RODADA_CALCULADA = "rodada_calculada",
   FINAL_PARTIDA = "final_partida",
   SALA_ATUALIZADA = "sala_atualizada",
-  PARTIDA_INICIADA = "partida_iniciada",
 }
 
 export type ServerEvent<E extends SocketServerEventsEnum> = (

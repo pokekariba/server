@@ -1,10 +1,8 @@
 import { Request, Response } from "express";
 import { uploadParaCloudinary } from "../config/cloudinary.config";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../config/prisma.config";
 import { gerarNomeImagem, sanitizarImagem } from "../utils/imageUtil";
 import cloudinary from "../config/cloudinary.config";
-
-const prisma = new PrismaClient();
 
 export const adicionarImagemItem = async (req: Request, res: Response) => {
   const { idItem } = req.body;

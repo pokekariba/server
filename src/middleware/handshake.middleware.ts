@@ -1,11 +1,10 @@
 import { Socket } from "socket.io";
 import { verificarToken } from "../utils/jwt";
-import { PrismaClient, StatusPartida, StatusUsuario } from "@prisma/client";
+import { StatusPartida, StatusUsuario } from "@prisma/client";
 import { socketError } from "../utils/socketError";
+import { prisma } from "../config/prisma.config";
 
 export type NextFunction = (err?: Error) => void;
-
-const prisma = new PrismaClient();
 
 export const handShakeMiddleware = async (
   socket: Socket,
