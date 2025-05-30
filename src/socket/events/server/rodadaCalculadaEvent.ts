@@ -3,37 +3,58 @@ import {
   ServerEvent,
   SocketServerEventsEnum,
 } from "../../../@types/SocketEvents";
-import {
-  JogadoresPartida,
-  SocketServerEventsPayload,
-} from "../../../@types/SocketEventsData";
-import { Socket } from 'socket.io';
+import { SocketServerEventsPayload } from "../../../@types/SocketEventsData";
+import { JogadorPartida } from "../../../@types/EstadoPartida";
+import partidaService from "../../../services/partida.service";
+import { emitEvent } from "../setupEvents";
 
 export const rodadaCalculadaEvent: ServerEvent<
   SocketServerEventsEnum.RODADA_CALCULADA
 > = async (socket, io, data) => {
   const sockets = await io.in(data.idPartida).fetchSockets();
 
+  const partida = partidaService.buscarPartidaEmAndamento(data.idPartida);
+
+  if (!partida) {
+    console.error(`Partida ${data.idPartida} não encontrada.`);
+    return emitEvent(socket, io, SocketServerEventsEnum.FINAL_PARTIDA, {
+      idPartida: data.idPartida,
+    });
+  }
+
   const { maos, capturadas, pontuacoes } = separarInformacoesPorJogador(
-    data.jogadores
+    partida.jogadores
   );
 
-  for (const s of sockets) {
+  for (const [i, s] of sockets.entries()) {
     const isJogador = s.data.usuario.id === socket.data.usuario.id;
-    const idAdversario = isJogador ? 
-    const maoJogador = maos.get(s.data.idUsuario) || [];
+    if (!isJogador && data.reconexao) continue;
+    const idAdversario = sockets[+!i].data.usuario.id;
+    const maoJogador = maos.get(s.data.usuario.id) || [];
+    const maoAdversario = maos.get(idAdversario)?.length || 0;
+    const cartasCapturadas = capturadas.get(s.data.usuario.id) || [];
+    const cartasCapturadasAdversario = capturadas.get(idAdversario) || [];
+    const pontuacaoJogador = pontuacoes.get(s.data.usuario.id) || 0;
+    const pontuacaoAdversario = pontuacoes.get(idAdversario) || 0;
 
     const payload: SocketServerEventsPayload["rodada_calculada"] = {
-      tabuleiro: data.tabuleiro,
-      rodada: data.rodada,
-      baralho: data.baralho,
+      tabuleiro: partida.tabuleiro,
+      rodada: partida.rodada,
+      baralho: partida.baralho,
+      jogadaAdversario: data.jogada,
       suaVez: !isJogador,
+      maoJogador,
+      maoAdversario,
+      cartasCapturadas,
+      cartasCapturadasAdversario,
+      pontuacaoAdversario,
+      pontuacaoJogador,
     };
     s.emit(SocketServerEventsEnum.RODADA_CALCULADA, payload);
   }
 };
 
-const separarInformacoesPorJogador = (jogadores: JogadoresPartida[]) => {
+const separarInformacoesPorJogador = (jogadores: JogadorPartida[]) => {
   let maos = new Map<number, Carta[]>();
   let capturadas = new Map<number, number[]>();
   let pontuacoes = new Map<number, number>();
@@ -63,7 +84,3 @@ const separarCartasPorTipo = (cartas: Carta[]) => {
   );
   return tipos;
 };
-
-const buscarAdversario = (sockets: Socket[], idJogador: number) => {
-
-}

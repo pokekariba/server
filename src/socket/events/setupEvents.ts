@@ -15,7 +15,6 @@ import { criarPartidaEvent } from "./client/criarPartidaEvent";
 import { listarPartidasEvent } from "./server/listarPartidasEvent";
 import { finalPartidaEvent } from "./server/finalPartidaEvent";
 import { salaAtualizadaEvent } from "./server/salaAtualizadaEvent";
-import { partidaIniciadaEvent } from "./server/partidaIniciadaEvent";
 import { typedKeys } from "../../utils/typedKeys";
 import { rodadaCalculadaEvent } from "./server/rodadaCalculadaEvent";
 
@@ -32,7 +31,6 @@ const serverEvents: { [K in SocketServerEventsEnum]: ServerEvent<K> } = {
   listar_partidas: listarPartidasEvent,
   final_partida: finalPartidaEvent,
   sala_atualizada: salaAtualizadaEvent,
-  partida_iniciada: partidaIniciadaEvent,
   rodada_calculada: rodadaCalculadaEvent,
 };
 

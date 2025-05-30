@@ -59,6 +59,8 @@ model Usuario {
   cargo            CargoUsuario
   jogadorPartidas  JogadorPartida[]
   itens            ItemUsuario[]
+  partidasCriadas   Partida[]        @relation("CriadorPartida")
+  partidasGanhas    Partida[]        @relation("GanhadorPartida")
 }
 
 model Partida {
@@ -71,6 +73,10 @@ model Partida {
   senha           String?          // nullable
   jogadores       JogadorPartida[]
   cartas          Carta[]
+  criador_id   Int
+  ganhador_id  Int?
+  criador      Usuario   @relation("CriadorPartida", fields: [criador_id], references: [id])
+  ganhador     Usuario?  @relation("GanhadorPartida", fields: [ganhador_id], references: [id])
 }
 
 model JogadorPartida {

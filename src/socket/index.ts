@@ -35,7 +35,7 @@ export function setupSocketIO(server: HttpServer) {
     socket.on("disconnect", () => disconnectEvent(socket, io));
     if (socket.data.idPartida) {
       socket.join(socket.data.idPartida);
-      emitEvent(socket, io, SocketServerEventsEnum.PARTIDA_INICIADA, {
+      emitEvent(socket, io, SocketServerEventsEnum.RODADA_CALCULADA, {
         idPartida: socket.data.idPartida,
         reconexao: true,
       });
