@@ -3,25 +3,16 @@ import {
   ServerEvent,
   SocketServerEventsEnum,
 } from "./../../../@types/SocketEvents";
-import { prisma } from "../../../config/prisma.config";
 import {
   SocketServerEventsPayload,
   TargetEventEnum,
 } from "../../../@types/SocketEventsData";
+import partidaService from "../../../services/partida.service";
 
 export const listarPartidasEvent: ServerEvent<
   SocketServerEventsEnum.LISTAR_PARTIDAS
 > = async (socket, io, data) => {
-  const partidas = await prisma.partida.findMany({
-    select: {
-      id: true,
-      nome: true,
-      vagas: true,
-    },
-    where: {
-      status: StatusPartida.em_espera,
-    },
-  });
+  const partidas = await partidaService.listarPartidasEmEspera();
 
   const payload: SocketServerEventsPayload["listar_partidas"] = {
     partidas,

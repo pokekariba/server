@@ -6,11 +6,14 @@ import { disconnectEvent } from "./events/client/disconnect.event";
 import { emitEvent, setupEvents } from "./events/setupEvents";
 import { SocketServerEventsEnum } from "../@types/SocketEvents";
 import { TargetEventEnum } from "../@types/SocketEventsData";
+import partidaService from "../services/partida.service";
 
 export function setupSocketIO(server: HttpServer) {
   const io = new Server(server, {
     cors: { origin: "*" },
   });
+
+  partidaService.init(io);
 
   io.use(handShakeMiddleware);
 

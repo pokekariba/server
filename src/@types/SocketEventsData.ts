@@ -6,6 +6,7 @@ import {
   Usuario,
 } from "@prisma/client";
 import { SocketClientEventsEnum, SocketServerEventsEnum } from "./SocketEvents";
+import { EstadoPartida, ResumoPartida } from "./EstadoPartida";
 
 export interface SocketClientEventsData {
   [SocketClientEventsEnum.JOGADA]: {
@@ -31,17 +32,8 @@ export interface SocketServerEventsData {
     to: TargetEventEnum;
     idPartida?: string;
   };
-  [SocketServerEventsEnum.RODADA_CALCULADA]: {
-    idPartida: string;
-    rodada: number;
-    tabuleiro: Carta[];
-    jogadores: Prisma.JogadorPartidaGetPayload<{
-      include: {
-        cartas: true;
-      };
-    }>[];
+  [SocketServerEventsEnum.RODADA_CALCULADA]: EstadoPartida & {
     jogada: Carta | null;
-    baralho: number;
   };
   [SocketServerEventsEnum.FINAL_PARTIDA]: {
     idPartida: string;
@@ -60,7 +52,7 @@ export interface SocketServerEventsData {
 
 export interface SocketServerEventsPayload {
   [SocketServerEventsEnum.LISTAR_PARTIDAS]: {
-    partidas: Pick<Partida, "id" | "nome" | "vagas">[];
+    partidas: ResumoPartida[];
   };
   [SocketServerEventsEnum.RODADA_CALCULADA]: {
     rodada: number;
