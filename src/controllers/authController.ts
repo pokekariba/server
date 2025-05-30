@@ -7,7 +7,7 @@ import {
 import { compararString, criptografarString } from "../utils/criptografia";
 import nodemailer from "nodemailer";
 import { StatusUsuario, CargoUsuario } from "../@types/usuarioTypes";
-import { prisma } from "../config/prisma.config";
+import prisma from "../config/prisma.config";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {

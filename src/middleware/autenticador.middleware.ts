@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { gerarAccessToken, verificarToken } from "../utils/jwt";
-import { prisma } from "../config/prisma.config";
+import prisma from "../config/prisma.config";
 
 export async function autenticador(
   req: Request,

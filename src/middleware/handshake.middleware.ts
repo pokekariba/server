@@ -2,7 +2,7 @@ import { Socket } from "socket.io";
 import { verificarToken } from "../utils/jwt";
 import { StatusPartida, StatusUsuario } from "@prisma/client";
 import { socketError } from "../utils/socketError";
-import { prisma } from "../config/prisma.config";
+import prisma from "../config/prisma.config";
 
 export type NextFunction = (err?: Error) => void;
 

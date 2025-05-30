@@ -1,7 +1,8 @@
 import { Partida, Prisma, StatusPartida, Usuario } from "@prisma/client";
 import { EstadoPartida, ResumoPartida } from "../@types/EstadoPartida";
 import prisma from "../config/prisma.config";
-import { RemoteSocket, Server } from "socket.io";
+import { Server } from "socket.io";
+import { criptografarString } from "../utils/criptografia";
 
 const estadoPartidasAndamento = new Map<number, EstadoPartida>();
 let io!: Server;
@@ -57,6 +58,30 @@ const partidaService = {
     if (!partida) {
       throw new Error(`Partida com ID ${idPartida} não encontrada.`);
     }
+    return partida;
+  },
+  criarPartida: async (
+    nome: string,
+    idCriador: string,
+    senha?: string
+  ): Promise<Partida> => {
+    const senhaCriptografada = await criptografarString(senha || "");
+    const partida = await prisma.partida.create({
+      data: {
+        nome,
+        status: StatusPartida.em_espera,
+        vagas: 1,
+        senha: senha ? senhaCriptografada : undefined,
+        criador_id: Number(idCriador),
+        jogadores: {
+          create: {
+            ordem_jogada: 1,
+            usuario_id: Number(idCriador),
+            pontuacao: 0,
+          },
+        },
+      },
+    });
     return partida;
   },
 };

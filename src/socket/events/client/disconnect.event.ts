@@ -3,7 +3,7 @@ import { Server, Socket } from "socket.io";
 import { emitEvent } from "../setupEvents";
 import { SocketServerEventsEnum } from "../../../@types/SocketEvents";
 import { TargetEventEnum } from "../../../@types/SocketEventsData";
-import { prisma } from "../../../config/prisma.config";
+import prisma from "../../../config/prisma.config";
 
 export const disconnectEvent = async (socket: Socket, io: Server) => {
   const usuario = socket.data.usuario as Usuario;

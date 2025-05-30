@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { Usuario } from "@prisma/client";
-import { prisma } from "../config/prisma.config";
+import prisma from "../config/prisma.config";
 
 export const comprarItem = async (
   req: Request,

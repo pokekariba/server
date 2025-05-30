@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { StatusUsuario } from "@prisma/client";
-import { prisma } from "../config/prisma.config";
+import prisma from "../config/prisma.config";
 
 export const banirUsuario = async (req: Request, res: Response) => {
   const { idUsuario } = req.body;
