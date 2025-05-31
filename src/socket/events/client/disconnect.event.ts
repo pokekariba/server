@@ -4,6 +4,7 @@ import { emitEvent } from "../setupEvents";
 import { SocketServerEventsEnum } from "../../../@types/SocketEvents";
 import { TargetEventEnum } from "../../../@types/SocketEventsData";
 import prisma from "../../../config/prisma.config";
+import usuarioService from "../../../services/usuario.service";
 
 export const disconnectEvent = async (socket: Socket, io: Server) => {
   const usuario = socket.data.usuario as Usuario;
@@ -31,8 +32,5 @@ export const disconnectEvent = async (socket: Socket, io: Server) => {
     });
     return;
   }
-  await prisma.usuario.update({
-    where: { id: usuario.id },
-    data: { status: StatusUsuario.offline },
-  });
+  usuarioService.mudarStatusUsuario(StatusUsuario.offline, usuario.id, socket);
 };

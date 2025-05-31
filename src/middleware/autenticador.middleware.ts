@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from "express";
 import { gerarAccessToken, verificarToken } from "../utils/jwt";
-import prisma from "../config/prisma.config";
+import usuarioService from "../services/usuario.service";
 
 export async function autenticador(
   req: Request,
@@ -18,11 +18,7 @@ export async function autenticador(
 
   try {
     const payload = verificarToken(token);
-    const usuario = await prisma.usuario.findUnique({
-      where: {
-        id: +payload.id,
-      },
-    });
+    const usuario = await usuarioService.buscarUsuario({id: Number(payload.id)});
     if (!usuario) {
       res.status(401).json({ mensagem: "Usuário não encontrado" });
       return;

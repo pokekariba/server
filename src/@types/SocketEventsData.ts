@@ -6,12 +6,16 @@ export interface SocketClientEventsData {
   [SocketClientEventsEnum.JOGADA]: {
     idCarta: string;
   };
-  [SocketClientEventsEnum.DESISTIR]: void;
+  [SocketClientEventsEnum.DESISTIR_PARTIDA]: {
+    idPartida: string;
+  };
   [SocketClientEventsEnum.ENTRAR_PARTIDA]: {
     idPartida: string;
     senha?: string;
   };
-  [SocketClientEventsEnum.SAIR_PARTIDA]: void;
+  [SocketClientEventsEnum.SAIR_PARTIDA]: {
+    idPartida: string;
+  };
   [SocketClientEventsEnum.CRIAR_PARTIDA]: {
     nome: string;
     senha?: string;

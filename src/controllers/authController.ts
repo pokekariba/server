@@ -6,16 +6,14 @@ import {
 } from "../utils/jwt";
 import { compararString, criptografarString } from "../utils/criptografia";
 import nodemailer from "nodemailer";
-import { StatusUsuario, CargoUsuario } from "../@types/usuarioTypes";
-import prisma from "../config/prisma.config";
+import { CargoUsuario, StatusUsuario } from "@prisma/client";
+import usuarioService from "../services/usuario.service";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { usuario, senha } = req.body;
 
-    const user = await prisma.usuario.findFirst({
-      where: { nome: usuario },
-    });
+    const user = await usuarioService.buscarUsuario({nome: usuario});
 
     if (!user) {
       res
@@ -67,9 +65,7 @@ export const loginBackoffice = async (
   try {
     const { usuario, senha } = req.body;
 
-    const user = await prisma.usuario.findFirst({
-      where: { nome: usuario },
-    });
+    const user = await usuarioService.buscarUsuario({nome: usuario});
 
     if (!user) {
       res
@@ -142,11 +138,7 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const usuarioExistente = await prisma.usuario.findFirst({
-      where: {
-        OR: [{ nome: usuario }, { email: email }],
-      },
-    });
+    const usuarioExistente = await usuarioService.buscarUsuario({email,nome: usuario, operador: "or"});
 
     if (usuarioExistente) {
       res.status(400).json({ mensagem: "E-mail ou usuário já cadastrado." });
@@ -155,21 +147,7 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
 
     const senhaCriptografada = await criptografarString(senha);
 
-    const novoUsuario = await prisma.usuario.create({
-      data: {
-        email,
-        nome: usuario,
-        senha: senhaCriptografada,
-        moedas: 0,
-        partidas_ganhas: 0,
-        partidas_totais: 0,
-        avatar_ativo: 0,
-        fundo_ativo: 0,
-        deck_ativo: 0,
-        status: StatusUsuario.offline,
-        cargo: CargoUsuario.jogador,
-      },
-    });
+    const novoUsuario = await usuarioService.criarUsuario(email,usuario,senhaCriptografada);
 
     res.sendStatus(200);
   } catch (erro) {
@@ -191,9 +169,7 @@ export const recuperarSenha = async (
       return;
     }
 
-    const user = await prisma.usuario.findFirst({
-      where: { nome: usuario, email: email },
-    });
+    const user = await usuarioService.buscarUsuario({email,nome: usuario});
 
     if (!user) {
       res.status(404).json({ mensagem: "Usuário inexistente." });
@@ -284,9 +260,7 @@ export const redefinirSenha = async (
       return;
     }
 
-    const user = await prisma.usuario.findFirst({
-      where: { nome: usuario },
-    });
+    const user = await usuarioService.buscarUsuario({ nome: usuario });
 
     if (!user) {
       res.status(404).json({ mensagem: "Usuário inexistente." });
@@ -295,10 +269,7 @@ export const redefinirSenha = async (
 
     const senhaCriptografada = await criptografarString(novaSenha);
 
-    await prisma.usuario.update({
-      where: { id: user.id },
-      data: { senha: senhaCriptografada },
-    });
+    await usuarioService.atualizarSenha(user.id, senhaCriptografada);
 
     res.sendStatus(200);
   } catch (erro) {

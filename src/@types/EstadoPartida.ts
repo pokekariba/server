@@ -5,7 +5,7 @@ export interface EstadoPartida {
   rodada: number;
   tabuleiro: Carta[];
   jogadores: JogadorPartida[];
-  baralho: number;
+  baralho: Carta[];
 }
 
 export type JogadorPartida = Prisma.JogadorPartidaGetPayload<{

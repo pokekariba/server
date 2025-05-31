@@ -1,4 +1,4 @@
-import { Partida, Prisma, StatusPartida, Usuario } from "@prisma/client";
+import { Partida, Prisma, StatusPartida, StatusUsuario, Usuario } from "@prisma/client";
 import { EstadoPartida, ResumoPartida } from "../@types/EstadoPartida";
 import prisma from "../config/prisma.config";
 import { Server } from "socket.io";
@@ -37,7 +37,7 @@ const partidaService = {
   buscarPartidaEmAndamento: (idPartida: string): EstadoPartida | undefined => {
     return estadoPartidasAndamento.get(Number(idPartida));
   },
-  buscarPartida: async (idPartida: string): Promise<PatidaComNomeUsuario> => {
+  buscarPartidaComUsuario: async (idPartida: string): Promise<PatidaComUsuario> => {
     const partida = await prisma.partida.findUnique({
       where: {
         id: Number(idPartida),
@@ -46,7 +46,7 @@ const partidaService = {
         jogadores: {
           include: {
             usuario: {
-              select: { nome: true },
+              select: { id: true, nome: true },
             },
           },
         },
@@ -60,6 +60,28 @@ const partidaService = {
     }
     return partida;
   },
+  buscarPartidaPeloUsuario: async (idUsuario: number) => {
+    return await prisma.partida.findFirst({
+        select: {
+          id: true,
+        },
+        where: {
+          status: StatusPartida.em_andamento,
+          jogadores: {
+            some: {
+              usuario_id: idUsuario,
+            },
+          },
+        },
+      });
+  },
+  buscarPartida: async (idPartida: string) => {
+    return await prisma.partida.findFirst({
+      where: {
+        id: Number(idPartida)
+      }
+    })
+  },
   criarPartida: async (
     nome: string,
     idCriador: string,
@@ -70,25 +92,70 @@ const partidaService = {
       data: {
         nome,
         status: StatusPartida.em_espera,
-        vagas: 1,
         senha: senha ? senhaCriptografada : undefined,
         criador_id: Number(idCriador),
         jogadores: {
           create: {
             ordem_jogada: 1,
-            usuario_id: Number(idCriador),
-            pontuacao: 0,
+            usuario_id: Number(idCriador)
           },
         },
       },
     });
     return partida;
   },
+  desistirPartida: async (idPartida: string, idDesistente: string, idGanhador: string) => {
+    await prisma.$transaction(async (dx) => {
+      await dx.partida.update({
+        data: {
+          status: StatusPartida.finalizado,
+          ganhador_id: Number(idGanhador),
+          data_fim: new Date()
+        },
+        where: {
+          id: Number(idPartida)
+        }
+      });
+
+      await dx.usuario.updateMany({
+        where: {
+          jogadorPartidas: {
+            some: {
+              partida_id: Number(idPartida)
+            },
+          },
+        },
+        data: { status: StatusUsuario.online }
+      });
+
+      await dx.jogadorPartida.updateMany({
+        where: {partida_id: Number(idDesistente)},
+        data: {pontuacao: 0}
+      })
+    });
+    estadoPartidasAndamento.delete(Number(idPartida));
+  },
+  preencherVaga: async (partida: Partida, idUsuario: number) => {
+    const id = partida.id;
+    const ordem_jogada = 3 - partida.vagas;
+    return await prisma.partida.update({
+      where: { id },
+      data: {
+        vagas: { decrement: 1 },
+        jogadores: {
+          create: {
+            usuario_id: idUsuario,
+            ordem_jogada
+          }
+        }
+      }
+    })
+  }
 };
 
 export default partidaService;
 
-export type PatidaComNomeUsuario = Prisma.PartidaGetPayload<{
+export type PatidaComUsuario = Prisma.PartidaGetPayload<{
   include: {
     ganhador: {
       select: {
@@ -99,6 +166,7 @@ export type PatidaComNomeUsuario = Prisma.PartidaGetPayload<{
       include: {
         usuario: {
           select: {
+            id: true;
             nome: true;
           };
         };

@@ -8,7 +8,7 @@ import partidaService from "../../../services/partida.service";
 export const finalPartidaEvent: ServerEvent<
   SocketServerEventsEnum.FINAL_PARTIDA
 > = async (socket, io, data) => {
-  const partida = await partidaService.buscarPartida(data.idPartida);
+  const partida = await partidaService.buscarPartidaComUsuario(data.idPartida);
   if (!partida) return;
 
   const jogadores = partida.jogadores;

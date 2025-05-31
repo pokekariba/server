@@ -4,9 +4,17 @@ import { handShakeMiddleware } from "../middleware/handshake.middleware";
 import { socketMiddleware } from "../middleware/socket.middleware";
 import { disconnectEvent } from "./events/client/disconnect.event";
 import { emitEvent, setupEvents } from "./events/setupEvents";
-import { SocketServerEventsEnum } from "../@types/SocketEvents";
+import { SocketClientEventsEnum, SocketServerEventsEnum } from "../@types/SocketEvents";
 import { TargetEventEnum } from "../@types/SocketEventsData";
 import partidaService from "../services/partida.service";
+import { partidaMiddleware } from "../middleware/partida.middleware";
+
+const eventosVerificacaoPartida: SocketClientEventsEnum[] = [
+  SocketClientEventsEnum.DESISTIR_PARTIDA,
+  SocketClientEventsEnum.INICIAR_PARTIDA,
+  SocketClientEventsEnum.JOGADA,
+  SocketClientEventsEnum.SAIR_PARTIDA
+]
 
 export function setupSocketIO(server: HttpServer) {
   const io = new Server(server, {
@@ -20,6 +28,7 @@ export function setupSocketIO(server: HttpServer) {
   io.on("connection", (socket) => {
     socket.use((packet, next) => {
       socketMiddleware(packet, socket, next);
+      partidaMiddleware(packet, socket, next, eventosVerificacaoPartida)
     });
     console.log("Novo cliente conectado:", socket.id);
     setupEvents(socket, io);
@@ -33,10 +42,10 @@ export function setupSocketIO(server: HttpServer) {
       }
     });
     socket.on("disconnect", () => disconnectEvent(socket, io));
-    if (socket.data.idPartida) {
-      socket.join(socket.data.idPartida);
+    if (socket.data.idPartidaReconectar) {
+      socket.join(socket.data.idPartidaReconectar);
       emitEvent(socket, io, SocketServerEventsEnum.RODADA_CALCULADA, {
-        idPartida: socket.data.idPartida,
+        idPartida: socket.data.idPartidaReconectar,
         reconexao: true,
       });
     } else {

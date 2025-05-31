@@ -1,15 +1,13 @@
 import { Request, Response } from "express";
 import { StatusUsuario } from "@prisma/client";
-import prisma from "../config/prisma.config";
+import usuarioService from "../services/usuario.service";
 
 export const banirUsuario = async (req: Request, res: Response) => {
   const { idUsuario } = req.body;
 
   try {
     // Busca o usuário que será banido
-    const usuario = await prisma.usuario.findUnique({
-      where: { id: Number(idUsuario) },
-    });
+    const usuario = await usuarioService.buscarUsuario({id: Number(idUsuario)});
 
     if (!usuario) {
       res.status(404).json({ mensagem: "Usuário não encontrado." });
@@ -22,10 +20,7 @@ export const banirUsuario = async (req: Request, res: Response) => {
         ? StatusUsuario.offline
         : StatusUsuario.banido;
 
-    const usuarioAtualizado = await prisma.usuario.update({
-      where: { id: usuario.id },
-      data: { status: novoStatus },
-    });
+    const usuarioAtualizado = await usuarioService.mudarStatusUsuario(novoStatus, usuario.id);
 
     res.status(200).json({
       mensagem: `Usuário ${novoStatus === "banido" ? "banido" : "desbanido"} com sucesso.`,
@@ -63,18 +58,7 @@ export const listarUsuarios = async (req: Request, res: Response) => {
       return;
     }
 
-    const usuarios = await prisma.usuario.findMany({
-      where: {
-        nome: { contains: nome, mode: "insensitive" },
-        email: { contains: email, mode: "insensitive" },
-      },
-      select: {
-        id: true,
-        nome: true,
-        email: true,
-        status: true,
-      },
-    });
+    const usuarios = await usuarioService.listarUsuarios(nome, email);
 
     res.status(200).json({ usuarios });
     return;

@@ -40,7 +40,7 @@ export const rodadaCalculadaEvent: ServerEvent<
     const payload: SocketServerEventsPayload["rodada_calculada"] = {
       tabuleiro: partida.tabuleiro,
       rodada: partida.rodada,
-      baralho: partida.baralho,
+      baralho: partida.baralho.length,
       jogadaAdversario: data.jogada,
       suaVez: !isJogador,
       maoJogador,

@@ -28,7 +28,7 @@ export const criarPartidaEvent: ClientEvent<
     return;
   }
 
-  usuarioService.mudarStatusUsuario(idCriador, StatusUsuario.em_partida);
+  usuarioService.mudarStatusUsuario(StatusUsuario.em_partida, Number(idCriador), socket);
 
   socket.join(partida.id.toString());
 
