@@ -11,7 +11,7 @@ import { emitEvent } from "../setupEvents";
 export const rodadaCalculadaEvent: ServerEvent<
   SocketServerEventsEnum.RODADA_CALCULADA
 > = async (socket, io, data) => {
-  const sockets = await io.in(data.idPartida).fetchSockets();
+  const sockets = await io.in(String(data.idPartida)).fetchSockets();
 
   const partida = partidaService.buscarPartidaEmAndamento(data.idPartida);
 
@@ -40,7 +40,7 @@ export const rodadaCalculadaEvent: ServerEvent<
     const payload: SocketServerEventsPayload["rodada_calculada"] = {
       tabuleiro: partida.tabuleiro,
       rodada: partida.rodada,
-      baralho: partida.baralho,
+      baralho: partida.baralho.length,
       jogadaAdversario: data.jogada,
       suaVez: !isJogador,
       maoJogador,
@@ -74,9 +74,9 @@ const separarCartasPorTipo = (cartas: Carta[]) => {
   const tipos = cartas.reduce(
     (acc, carta) => {
       if (carta.tipo === TipoCarta.mao) {
-        acc.mao.push(carta);
+        acc.mao[carta.posicao] = carta;
       } else {
-        acc.capturada[carta.valor] = carta.quantidade;
+        acc.capturada[carta.valor]++;
       }
       return acc;
     },

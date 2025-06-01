@@ -23,7 +23,7 @@ const clientEvents: { [K in SocketClientEventsEnum]: ClientEvent<K> } = {
   entrar_partida: entrarPartidaEvent,
   iniciar_partida: iniciarPartidaEvent,
   criar_partida: criarPartidaEvent,
-  desistir: desistirEvent,
+  desistir_partida: desistirEvent,
   sair_partida: sairPartidaEvent,
 };
 

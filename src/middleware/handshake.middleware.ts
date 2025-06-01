@@ -1,8 +1,9 @@
 import { Socket } from "socket.io";
 import { verificarToken } from "../utils/jwt";
-import { StatusPartida, StatusUsuario } from "@prisma/client";
+import { StatusUsuario } from "@prisma/client";
 import { socketError } from "../utils/socketError";
-import { prisma } from "../config/prisma.config";
+import usuarioService from "../services/usuario.service";
+import partidaService from "../services/partida.service";
 
 export type NextFunction = (err?: Error) => void;
 
@@ -19,11 +20,7 @@ export const handShakeMiddleware = async (
     if (payload.tipo !== "access") {
       return next(socketError("Token inválido ou expirado.", 401));
     }
-    let usuario = await prisma.usuario.findUnique({
-      where: {
-        id: +payload.id,
-      },
-    });
+    let usuario = await usuarioService.buscarUsuario({id: Number(payload.id)});
 
     if (!usuario) {
       return next(socketError("Usuário não encontrado.", 404));
@@ -34,29 +31,14 @@ export const handShakeMiddleware = async (
     }
 
     if (usuario.status === StatusUsuario.em_partida) {
-      const partida = await prisma.partida.findFirst({
-        select: {
-          id: true,
-        },
-        where: {
-          status: StatusPartida.em_andamento,
-          jogadores: {
-            some: {
-              usuario_id: usuario.id,
-            },
-          },
-        },
-      });
+      const partida = await partidaService.buscarPartidaPeloUsuario(usuario.id);
       if (partida) {
-        socket.data.idPartida = partida.id;
+        socket.data.idPartidaReconectar = partida.id;
       }
     }
 
-    if (!socket.data.idPartida) {
-      usuario = await prisma.usuario.update({
-        where: { id: usuario.id },
-        data: { status: StatusUsuario.online },
-      });
+    if (!socket.data.idPartidaReconectar) {
+      usuario = await usuarioService.mudarStatusUsuario(StatusUsuario.online, usuario.id, socket);
     }
     socket.data.usuario = usuario;
     next();

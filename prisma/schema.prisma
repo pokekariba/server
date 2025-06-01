@@ -67,7 +67,7 @@ model Partida {
   id              Int              @id @default(autoincrement())
   nome            String
   data_inicio     DateTime         @default(now())
-  data_fim        DateTime
+  data_fim        DateTime?         // nullable
   status          StatusPartida
   vagas           Int              @default(1)
   senha           String?          // nullable
@@ -98,7 +98,7 @@ model Carta {
   jogador_partida_id  Int?
   valor               Int
   tipo                TipoCarta
-  quantidade          Int
+  posicao             Int
 }
 
 model ItemLoja {

@@ -8,7 +8,7 @@ import partidaService from "../../../services/partida.service";
 export const finalPartidaEvent: ServerEvent<
   SocketServerEventsEnum.FINAL_PARTIDA
 > = async (socket, io, data) => {
-  const partida = await partidaService.buscarPartida(data.idPartida);
+  const partida = await partidaService.buscarPartidaComUsuario(data.idPartida);
   if (!partida) return;
 
   const jogadores = partida.jogadores;
@@ -22,11 +22,15 @@ export const finalPartidaEvent: ServerEvent<
     pontuacao,
   };
 
-  io.to(data.idPartida).emit(SocketServerEventsEnum.FINAL_PARTIDA, payload);
+  io.to(String(data.idPartida)).emit(
+    SocketServerEventsEnum.FINAL_PARTIDA,
+    payload
+  );
 
-  const sockets = await io.in(data.idPartida).fetchSockets();
+  const sockets = await io.in(String(data.idPartida)).fetchSockets();
+
   for (const s of sockets) {
-    s.leave(data.idPartida);
+    s.leave(String(data.idPartida));
     s.disconnect(true);
   }
 };

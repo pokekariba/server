@@ -6,7 +6,7 @@ import {
 
 export enum SocketClientEventsEnum {
   JOGADA = "jogada",
-  DESISTIR = "desistir",
+  DESISTIR_PARTIDA = "desistir_partida",
   ENTRAR_PARTIDA = "entrar_partida",
   SAIR_PARTIDA = "sair_partida",
   CRIAR_PARTIDA = "criar_partida",

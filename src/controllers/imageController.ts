@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { uploadParaCloudinary } from "../config/cloudinary.config";
-import { prisma } from "../config/prisma.config";
+import prisma from "../config/prisma.config";
 import { gerarNomeImagem, sanitizarImagem } from "../utils/imageUtil";
 import cloudinary from "../config/cloudinary.config";
 
@@ -39,7 +39,10 @@ export const adicionarImagemItem = async (req: Request, res: Response) => {
   }
 };
 
-export const visualizarItem = async (req: Request, res: Response): Promise<void> => {
+export const visualizarItem = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
   const { itemId } = req.body;
 
   if (typeof itemId !== "number") {
@@ -59,6 +62,8 @@ export const visualizarItem = async (req: Request, res: Response): Promise<void>
     res.status(200).json({ urlsItem });
   } catch (error) {
     console.error("Erro ao buscar imagens no Cloudinary:", error);
-    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
+    res
+      .status(500)
+      .json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };

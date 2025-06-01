@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import { DisponibilidadeItem, TipoItemLoja } from "@prisma/client";
-import { prisma } from "../config/prisma.config";
+import prisma from "../config/prisma.config";
 
 export async function adicionarItem(req: Request, res: Response) {
   try {

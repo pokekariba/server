@@ -29,7 +29,7 @@ export const listarPartidasEvent: ServerEvent<
       if (!data.idPartida) {
         throw new Error("idPartida is required for ROOM target");
       }
-      io.to(data.idPartida).emit(
+      io.to(String(data.idPartida)).emit(
         SocketServerEventsEnum.LISTAR_PARTIDAS,
         payload
       );

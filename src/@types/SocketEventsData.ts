@@ -4,38 +4,44 @@ import { EstadoPartida, ResumoPartida } from "./EstadoPartida";
 
 export interface SocketClientEventsData {
   [SocketClientEventsEnum.JOGADA]: {
-    idCarta: string;
+    idCartas: number[];
+    idPartida: number;
+    valorCamaleao?: number;
   };
-  [SocketClientEventsEnum.DESISTIR]: void;
+  [SocketClientEventsEnum.DESISTIR_PARTIDA]: {
+    idPartida: number;
+  };
   [SocketClientEventsEnum.ENTRAR_PARTIDA]: {
-    idPartida: string;
+    idPartida: number;
     senha?: string;
   };
-  [SocketClientEventsEnum.SAIR_PARTIDA]: void;
+  [SocketClientEventsEnum.SAIR_PARTIDA]: {
+    idPartida: number;
+  };
   [SocketClientEventsEnum.CRIAR_PARTIDA]: {
     nome: string;
     senha?: string;
   };
   [SocketClientEventsEnum.INICIAR_PARTIDA]: {
-    idPartida: string;
+    idPartida: number;
   };
 }
 
 export interface SocketServerEventsData {
   [SocketServerEventsEnum.LISTAR_PARTIDAS]: {
     to: TargetEventEnum;
-    idPartida?: string;
+    idPartida?: number;
   };
   [SocketServerEventsEnum.RODADA_CALCULADA]: {
-    idPartida: string;
+    idPartida: number;
     reconexao?: boolean;
-    jogada?: Carta;
+    jogada?: Carta[];
   };
   [SocketServerEventsEnum.FINAL_PARTIDA]: {
-    idPartida: string;
+    idPartida: number;
   };
   [SocketServerEventsEnum.SALA_ATUALIZADA]: {
-    idPartida: string;
+    idPartida: number;
   };
 }
 
@@ -45,8 +51,8 @@ export interface SocketServerEventsPayload {
   };
   [SocketServerEventsEnum.RODADA_CALCULADA]: {
     rodada: number;
-    tabuleiro: Carta[];
-    jogadaAdversario?: Carta;
+    tabuleiro: Carta[][];
+    jogadaAdversario?: Carta[];
     pontuacaoJogador: number;
     pontuacaoAdversario: number;
     cartasCapturadas: number[];
