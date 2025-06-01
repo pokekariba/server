@@ -31,7 +31,7 @@ export const jogadaEvent: ClientEvent<SocketClientEventsEnum.JOGADA> = async (
   const cartasReais = jogador.cartas.filter((carta) =>
     data.idCartas.includes(carta.id)
   );
-  if (!cartasReais.length) {
+  if (!cartasReais.length || cartasReais.length !== data.idCartas.length) {
     socketError("Carta não encontrada na mão do jogador.", 404, socket);
     return;
   }

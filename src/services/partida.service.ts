@@ -147,7 +147,7 @@ const partidaService = {
       });
 
       await dx.jogadorPartida.updateMany({
-        where: { partida_id: Number(idDesistente) },
+        where: { usuario_id: Number(idDesistente), partida_id: idPartida },
         data: { pontuacao: 0 },
       });
 
@@ -233,7 +233,6 @@ const partidaService = {
     jogador.cartas = jogador.cartas.filter(
       (carta) => !cartasJogadas.includes(carta)
     );
-    const quantidadesCartasCasas = tabuleiro.map((casa) => casa.length);
     const valorCartasJogadas = [
       ...new Set(cartasJogadas.map((carta) => carta.valor)),
     ].filter((valor) => valor !== 0);
@@ -242,7 +241,11 @@ const partidaService = {
       throw new Error("Somente um valor de carta pode ser jogado por vez.");
     }
 
-    const indexCasaCartasJogadas = valorCartasJogadas[0] ?? valorCamaleao;
+    if (!valorCartasJogadas.length && !valorCamaleao) {
+      throw new Error("Camaleão jogado sem valor definido.");
+    }
+
+    const indexCasaCartasJogadas = (valorCartasJogadas[0] ?? valorCamaleao) - 1;
 
     const casaTabuleiro = tabuleiro[indexCasaCartasJogadas];
 
@@ -253,25 +256,35 @@ const partidaService = {
       carta.posicao = index;
     });
 
-    if (casaTabuleiro.length > 3) {
-      const indexCapturadas = quantidadesCartasCasas.findIndex(
-        (quantidade, index) => quantidade && index > indexCasaCartasJogadas
-      );
+    if (casaTabuleiro.length >= 3) {
+      let indexCapturadas: number | undefined;
+      if (indexCasaCartasJogadas === 0) {
+        if (tabuleiro[7].length) {
+          indexCapturadas = 7;
+        }
+      } else {
+        for (let i = indexCasaCartasJogadas - 1; i >= 0; i--) {
+          if (!tabuleiro[i].length) continue;
+          indexCapturadas = i;
+          break;
+        }
+      }
+      if (indexCapturadas !== undefined) {
+        const cartasCapturadas = tabuleiro[indexCapturadas];
 
-      const cartasCapturadas = tabuleiro[indexCapturadas];
+        jogador.pontuacao += cartasCapturadas.length;
 
-      jogador.pontuacao += cartasCapturadas.length;
+        cartasCapturadas.forEach((carta) => {
+          carta.tipo = TipoCarta.capturado;
+          carta.jogador_partida_id = jogador.id;
+          carta.posicao = 0;
+        });
 
-      cartasCapturadas.forEach((carta) => {
-        carta.tipo = TipoCarta.capturado;
-        carta.jogador_partida_id = jogador.id;
-        carta.posicao = 0;
-      });
-
-      jogador.cartas.push(...cartasCapturadas);
-      tabuleiro[indexCapturadas] = [];
-      partida.rodada += 1;
+        jogador.cartas.push(...cartasCapturadas);
+        tabuleiro[indexCapturadas] = [];
+      }
     }
+    partida.rodada++;
 
     comprarCartas(jogador.id, partida.idPartida);
 
@@ -279,7 +292,51 @@ const partidaService = {
 
     return partida;
   },
-  finalizarPartida: async (idPartida: number): Promise<void> => {},
+  finalizarPartida: async (idPartida: number): Promise<void> => {
+    const partida = estadoPartidasAndamento.get(idPartida);
+
+    if (!partida) {
+      throw new Error(`Partida com ID ${idPartida} não encontrada.`);
+    }
+
+    const jogadores = partida.jogadores;
+
+    const maxPontos = Math.max(...jogadores.map((j) => j.pontuacao));
+    const vencedores = jogadores.filter((j) => j.pontuacao === maxPontos);
+
+    let ganhador_id: number;
+    if (vencedores.length === 1) {
+      ganhador_id = vencedores[0].id;
+    }
+
+    await prisma.$transaction(async (tx) => {
+      await tx.partida.update({
+        where: { id: idPartida },
+        data: {
+          status: StatusPartida.finalizado,
+          ganhador_id,
+          data_fim: new Date(),
+        },
+      });
+
+      await tx.usuario.updateMany({
+        where: {
+          jogadorPartidas: {
+            some: {
+              partida_id: idPartida,
+            },
+          },
+        },
+        data: { status: StatusUsuario.online },
+      });
+
+      await tx.carta.deleteMany({
+        where: { partida_id: idPartida },
+      });
+    });
+
+    estadoPartidasAndamento.delete(idPartida);
+  },
 };
 
 const embaralhar = <T>(array: T[]): T[] => {
@@ -321,7 +378,7 @@ const gerarBaralho = (partidaId: number): Carta[] => {
 
   baralho = embaralhar(baralho);
 
-  baralho = baralho.map((carta, index) => ({ ...carta, ordem: index }));
+  baralho = baralho.map((carta, index) => ({ ...carta, posicao: index }));
 
   return baralho;
 };
@@ -411,11 +468,15 @@ const comprarCartas = (idJogador: number, idPartida: number): void => {
   }
 
   const maoJogador = jogador.cartas || [];
-  const cartasParaComprar = 5 - maoJogador.length;
+
+  const cartasParaComprar = Math.min(
+    5 - maoJogador.length,
+    partida.baralho.length
+  );
 
   if (cartasParaComprar <= 0) return;
 
-  const cartasCompradas = partida.baralho.splice(0, cartasParaComprar);
+  const cartasCompradas = partida.baralho.splice(-cartasParaComprar);
 
   cartasCompradas.forEach((carta, index) => {
     carta.tipo = TipoCarta.mao;
