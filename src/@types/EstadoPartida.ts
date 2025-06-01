@@ -1,9 +1,10 @@
-import { Carta, Partida, Prisma } from "@prisma/client";
+import { Carta, Partida, Prisma, StatusPartida } from "@prisma/client";
 
 export interface EstadoPartida {
-  idPartida: string;
+  idPartida: number;
+  status: StatusPartida;
   rodada: number;
-  tabuleiro: Carta[];
+  tabuleiro: Carta[][];
   jogadores: JogadorPartida[];
   baralho: Carta[];
 }

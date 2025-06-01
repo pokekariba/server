@@ -5,6 +5,7 @@ import { SocketServerEventsEnum } from "../../../@types/SocketEvents";
 import { TargetEventEnum } from "../../../@types/SocketEventsData";
 import prisma from "../../../config/prisma.config";
 import usuarioService from "../../../services/usuario.service";
+import partidaService from "../../../services/partida.service";
 
 export const disconnectEvent = async (socket: Socket, io: Server) => {
   const usuario = socket.data.usuario as Usuario;
@@ -21,16 +22,10 @@ export const disconnectEvent = async (socket: Socket, io: Server) => {
   });
   if (usuario.status === StatusUsuario.em_partida && !partida) return;
   if (partida) {
-    await prisma.partida.update({
-      where: { id: partida.id },
-      data: {
-        vagas: { increment: 1 },
-      },
-    });
+    await partidaService.sairDaPartida(partida, usuario.id);
     emitEvent(socket, io, SocketServerEventsEnum.LISTAR_PARTIDAS, {
       to: TargetEventEnum.ALL,
     });
-    return;
   }
   usuarioService.mudarStatusUsuario(StatusUsuario.offline, usuario.id, socket);
 };

@@ -22,11 +22,15 @@ export const finalPartidaEvent: ServerEvent<
     pontuacao,
   };
 
-  io.to(data.idPartida).emit(SocketServerEventsEnum.FINAL_PARTIDA, payload);
+  io.to(String(data.idPartida)).emit(
+    SocketServerEventsEnum.FINAL_PARTIDA,
+    payload
+  );
 
-  const sockets = await io.in(data.idPartida).fetchSockets();
+  const sockets = await io.in(String(data.idPartida)).fetchSockets();
+
   for (const s of sockets) {
-    s.leave(data.idPartida);
+    s.leave(String(data.idPartida));
     s.disconnect(true);
   }
 };

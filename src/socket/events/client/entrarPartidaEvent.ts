@@ -16,29 +16,40 @@ export const entrarPartidaEvent: ClientEvent<
 > = async (socket, io, data) => {
   const usuario: Usuario = socket.data.usuario;
   if (usuario.status === StatusUsuario.em_partida) {
-    socketError("O usuário já esta em outra partida!", 403, true, socket);
+    socketError("O usuário já esta em outra partida!", 403, socket);
     return;
   }
-  const partida =  await partidaService.buscarPartida(data.idPartida);
+  const partida = await partidaService.buscarPartida(data.idPartida);
   if (!partida) {
-    socketError("Parida não foi encontrada.", 404, true, socket);
+    socketError("Parida não foi encontrada.", 404, socket);
     return;
   }
   if (partida.status !== StatusPartida.em_espera) {
-    socketError("Parida indiponível.", 403, true, socket);
+    socketError("Parida indiponível.", 403, socket);
     return;
   }
   if (!partida.vagas) {
-    socketError("Não há vagas disponíveis.", 403, true, socket);
+    socketError("Não há vagas disponíveis.", 403, socket);
     return;
   }
-  if (partida.senha && !(await compararString(data.senha || "", partida.senha))) {
-    socketError("Senha incorreta.", 403, true, socket);
+  if (
+    partida.senha &&
+    !(await compararString(data.senha || "", partida.senha))
+  ) {
+    socketError("Senha incorreta.", 403, socket);
     return;
   }
-  await partidaService.preencherVaga(partida, Number(usuario.id),);
+  await partidaService.preencherVaga(partida, Number(usuario.id));
   socket.join(String(usuario.id));
-  await usuarioService.mudarStatusUsuario(StatusUsuario.em_partida, Number(usuario.id), socket);
-  emitEvent(socket, io, SocketServerEventsEnum.SALA_ATUALIZADA, { idPartida: String(partida.id)});
-  emitEvent(socket, io, SocketServerEventsEnum.LISTAR_PARTIDAS, { to: TargetEventEnum.ALL });
+  await usuarioService.mudarStatusUsuario(
+    StatusUsuario.em_partida,
+    Number(usuario.id),
+    socket
+  );
+  emitEvent(socket, io, SocketServerEventsEnum.SALA_ATUALIZADA, {
+    idPartida: partida.id,
+  });
+  emitEvent(socket, io, SocketServerEventsEnum.LISTAR_PARTIDAS, {
+    to: TargetEventEnum.ALL,
+  });
 };

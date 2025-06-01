@@ -24,5 +24,8 @@ export const salaAtualizadaEvent: ServerEvent<
     partidas_ganhas: jogador.partidas_ganhas,
   }));
 
-  io.to(data.idPartida).emit(SocketServerEventsEnum.SALA_ATUALIZADA, payload);
+  io.to(String(data.idPartida)).emit(
+    SocketServerEventsEnum.SALA_ATUALIZADA,
+    payload
+  );
 };

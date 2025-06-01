@@ -17,23 +17,27 @@ export const criarPartidaEvent: ClientEvent<
   const idCriador = socket.data.usuario.id;
 
   if (!nome) {
-    socketError("Nome da partida é obrigatório.", 400, true, socket);
+    socketError("Nome da partida é obrigatório.", 400, socket);
     return;
   }
 
   const partida = await partidaService.criarPartida(nome, idCriador, senha);
 
   if (!partida) {
-    socketError("Erro ao criar partida.", 500, true, socket);
+    socketError("Erro ao criar partida.", 500, socket);
     return;
   }
 
-  usuarioService.mudarStatusUsuario(StatusUsuario.em_partida, Number(idCriador), socket);
+  usuarioService.mudarStatusUsuario(
+    StatusUsuario.em_partida,
+    Number(idCriador),
+    socket
+  );
 
   socket.join(partida.id.toString());
 
   emitEvent(socket, io, SocketServerEventsEnum.SALA_ATUALIZADA, {
-    idPartida: String(partida.id),
+    idPartida: partida.id,
   });
 
   emitEvent(socket, io, SocketServerEventsEnum.LISTAR_PARTIDAS, {

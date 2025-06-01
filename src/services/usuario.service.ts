@@ -6,7 +6,7 @@ const usuarioService = {
   mudarStatusUsuario: async (
     status: StatusUsuario,
     id: number,
-    socket?: Socket,
+    socket?: Socket
   ): Promise<Usuario> => {
     const usuario = await prisma.usuario.update({
       where: { id },
@@ -21,12 +21,12 @@ const usuarioService = {
     id,
     nome,
     email,
-    operador = 'and',
+    operador = "and",
   }: {
     id?: number;
     nome?: string;
     email?: string;
-    operador?: 'and' | 'or';
+    operador?: "and" | "or";
   }): Promise<Usuario | null> => {
     const conditions = [];
 
@@ -46,14 +46,15 @@ const usuarioService = {
       return null;
     }
 
-    const where =
-      operador === 'or'
-        ? { OR: conditions }
-        : { AND: conditions };
+    const where = operador === "or" ? { OR: conditions } : { AND: conditions };
 
     return await prisma.usuario.findFirst({ where });
   },
-  criarUsuario: async (email: string, nome: string, senha: string): Promise<Usuario> => {
+  criarUsuario: async (
+    email: string,
+    nome: string,
+    senha: string
+  ): Promise<Usuario> => {
     return await prisma.usuario.create({
       data: {
         email,
@@ -89,7 +90,7 @@ const usuarioService = {
         status: true,
       },
     });
-  }
+  },
 };
 
 export default usuarioService;
