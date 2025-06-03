@@ -25,6 +25,7 @@ export const salaAtualizadaEvent: ServerEvent<
     id: partida.id,
     nome: partida.nome,
     vagas: partida.vagas,
+    senha: !!partida.senha,
     donoPartida: Number(socket.data.usuario.id) === partida.criador_id,
     jogadores: [],
   };
