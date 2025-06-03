@@ -24,16 +24,21 @@ const partidaService = {
     io = server;
   },
   listarPartidasEmEspera: async (): Promise<ResumoPartida[]> => {
-    return await prisma.partida.findMany({
+    const listaPartidas = await prisma.partida.findMany({
       select: {
         id: true,
         nome: true,
         vagas: true,
+        senha: true,
       },
       where: {
         status: StatusPartida.em_espera,
       },
     });
+    return listaPartidas.map((partida) => ({
+      ...partida,
+      senha: !!partida.senha,
+    }));
   },
   listarUsuariosPartida: async (idPartida: number): Promise<Usuario[]> => {
     const jogadoresPartida = await prisma.jogadorPartida.findMany({

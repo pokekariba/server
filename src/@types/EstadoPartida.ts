@@ -15,4 +15,6 @@ export type JogadorPartida = Prisma.JogadorPartidaGetPayload<{
   };
 }>;
 
-export type ResumoPartida = Pick<Partida, "id" | "nome" | "vagas">;
+export type ResumoPartida = Pick<Partida, "id" | "nome" | "vagas"> & {
+  senha: boolean;
+};
