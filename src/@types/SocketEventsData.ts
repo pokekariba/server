@@ -39,6 +39,7 @@ export interface SocketServerEventsData {
   };
   [SocketServerEventsEnum.FINAL_PARTIDA]: {
     idPartida: number;
+    motivo: MotivoFinal;
   };
   [SocketServerEventsEnum.SALA_ATUALIZADA]: {
     idPartida: number;
@@ -65,6 +66,7 @@ export interface SocketServerEventsPayload {
   [SocketServerEventsEnum.FINAL_PARTIDA]: {
     vencedor: string;
     pontuacao: Map<string, number>;
+    motivo: MotivoFinal;
   };
   [SocketServerEventsEnum.SALA_ATUALIZADA]: {
     jogadores: JogadoresSala[];
@@ -75,6 +77,12 @@ export enum TargetEventEnum {
   ALL = "all",
   ROOM = "room",
   CLIENT = "client",
+}
+
+export enum MotivoFinal {
+  NORMAL = "normal",
+  DESISTENCIA = "desitencia",
+  ERRO_SERVICOR = "erro_servidor",
 }
 
 export type JogadoresSala = Pick<

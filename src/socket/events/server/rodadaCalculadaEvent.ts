@@ -3,7 +3,10 @@ import {
   ServerEvent,
   SocketServerEventsEnum,
 } from "../../../@types/SocketEvents";
-import { SocketServerEventsPayload } from "../../../@types/SocketEventsData";
+import {
+  MotivoFinal,
+  SocketServerEventsPayload,
+} from "../../../@types/SocketEventsData";
 import { JogadorPartida } from "../../../@types/EstadoPartida";
 import partidaService from "../../../services/partida.service";
 import { emitEvent } from "../setupEvents";
@@ -19,6 +22,7 @@ export const rodadaCalculadaEvent: ServerEvent<
     console.error(`Partida ${data.idPartida} não encontrada.`);
     return emitEvent(socket, io, SocketServerEventsEnum.FINAL_PARTIDA, {
       idPartida: data.idPartida,
+      motivo: MotivoFinal.ERRO_SERVICOR,
     });
   }
 

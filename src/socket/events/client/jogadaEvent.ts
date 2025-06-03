@@ -3,6 +3,7 @@ import {
   SocketClientEventsEnum,
   SocketServerEventsEnum,
 } from "../../../@types/SocketEvents";
+import { MotivoFinal } from "../../../@types/SocketEventsData";
 import partidaService from "../../../services/partida.service";
 import { socketError } from "../../../utils/socketError";
 import { emitEvent } from "../setupEvents";
@@ -42,6 +43,10 @@ export const jogadaEvent: ClientEvent<SocketClientEventsEnum.JOGADA> = async (
       jogador,
       data.valorCamaleao
     );
+    emitEvent(socket, io, SocketServerEventsEnum.RODADA_CALCULADA, {
+      idPartida: partida.idPartida,
+      jogada: cartasReais,
+    });
     if (
       partida.baralho.length === 0 &&
       partida.jogadores.every((j) => j.cartas.length === 0)
@@ -49,13 +54,9 @@ export const jogadaEvent: ClientEvent<SocketClientEventsEnum.JOGADA> = async (
       partidaService.finalizarPartida(partida.idPartida);
       emitEvent(socket, io, SocketServerEventsEnum.FINAL_PARTIDA, {
         idPartida: partida.idPartida,
+        motivo: MotivoFinal.NORMAL,
       });
-      return;
     }
-    emitEvent(socket, io, SocketServerEventsEnum.RODADA_CALCULADA, {
-      idPartida: partida.idPartida,
-      jogada: cartasReais,
-    });
   } catch (error: any) {
     socketError("Erro ao realizar jogada, " + error.message, 500, socket);
     return;

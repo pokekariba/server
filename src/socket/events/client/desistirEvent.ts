@@ -3,6 +3,7 @@ import {
   SocketClientEventsEnum,
   SocketServerEventsEnum,
 } from "../../../@types/SocketEvents";
+import { MotivoFinal } from "../../../@types/SocketEventsData";
 import partidaService from "../../../services/partida.service";
 import { emitEvent } from "../setupEvents";
 
@@ -23,5 +24,6 @@ export const desistirEvent: ClientEvent<
 
   emitEvent(socket, io, SocketServerEventsEnum.FINAL_PARTIDA, {
     idPartida: data.idPartida,
+    motivo: MotivoFinal.DESISTENCIA,
   });
 };

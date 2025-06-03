@@ -20,6 +20,7 @@ export const finalPartidaEvent: ServerEvent<
   const payload: SocketServerEventsPayload["final_partida"] = {
     vencedor: partida.ganhador?.nome || "Empate",
     pontuacao,
+    motivo: data.motivo,
   };
 
   io.to(String(data.idPartida)).emit(
