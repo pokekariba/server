@@ -7,13 +7,25 @@ import {
   SocketServerEventsPayload,
 } from "../../../@types/SocketEventsData";
 import partidaService from "../../../services/partida.service";
+import { socketError } from "../../../utils/socketError";
 
 export const salaAtualizadaEvent: ServerEvent<
   SocketServerEventsEnum.SALA_ATUALIZADA
 > = async (socket, io, data) => {
   const jogadores = await partidaService.listarUsuariosPartida(data.idPartida);
 
+  const partida = await partidaService.buscarPartida(data.idPartida);
+
+  if (!partida) {
+    socketError("Parida não foi encontrada.", 404, socket);
+    return;
+  }
+
   const payload: SocketServerEventsPayload["sala_atualizada"] = {
+    id: partida.id,
+    nome: partida.nome,
+    vagas: partida.vagas,
+    donoPartida: Number(socket.data.usuario.id) === partida.criador_id,
     jogadores: [],
   };
 

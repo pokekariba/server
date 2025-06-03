@@ -68,7 +68,8 @@ export interface SocketServerEventsPayload {
     pontuacao: Map<string, number>;
     motivo: MotivoFinal;
   };
-  [SocketServerEventsEnum.SALA_ATUALIZADA]: {
+  [SocketServerEventsEnum.SALA_ATUALIZADA]: ResumoPartida & {
+    donoPartida: boolean;
     jogadores: JogadoresSala[];
   };
 }
