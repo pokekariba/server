@@ -1,8 +1,9 @@
 import { Request, Response } from "express";
-import { Usuario } from "@prisma/client";
+import { DisponibilidadeItem, TipoItemLoja, Usuario } from "@prisma/client";
 import prisma from "../config/prisma.config";
+import { ItemLojaResponse } from "../@types/ItemLoja";
 
-export const comprarItem = async (
+export const comprarItemLoja = async (
   req: Request,
   res: Response
 ): Promise<void> => {
@@ -73,6 +74,64 @@ export const comprarItem = async (
     res.status(200).json({ saldoAtual: novoSaldo });
   } catch (erro) {
     console.error("Erro ao comprar item:", erro);
+    res
+      .status(500)
+      .json({ mensagem: "Erro interno tente novamente mais tarde." });
+  }
+};
+
+export const listaItemLoja = async (
+  req: Request,
+  res: Response
+): Promise<void> => {
+  try {
+    const usuarioId = res.locals.usuario.id;
+
+    const itensUsuario = await prisma.itemUsuario
+      .findMany({
+        select: {
+          item_loja_id: true,
+        },
+        where: {
+          usuario_id: usuarioId,
+        },
+      })
+      .then((arr) => arr.flatMap((item) => item.item_loja_id));
+
+    const itensLoja = await prisma.itemLoja.findMany({
+      where: {
+        OR: [
+          { disponibilidade: DisponibilidadeItem.disponivel },
+          { id: { in: itensUsuario } },
+        ],
+      },
+    });
+
+    const itensPorTipo = itensLoja.reduce(
+      (acc, item) => {
+        const obtido = itensUsuario.includes(item.id);
+        switch (item.tipo) {
+          case TipoItemLoja.avatar:
+            acc.avatar.push({ ...item, obtido });
+            break;
+          case TipoItemLoja.deck:
+            acc.cartas.push({ ...item, obtido });
+            break;
+          case TipoItemLoja.fundo:
+            acc.fundo.push({ ...item, obtido });
+            break;
+        }
+        return acc;
+      },
+      { cartas: [], fundo: [], avatar: [] } as {
+        cartas: ItemLojaResponse[];
+        fundo: ItemLojaResponse[];
+        avatar: ItemLojaResponse[];
+      }
+    );
+    res.status(200).json(itensPorTipo);
+  } catch (error) {
+    console.error("Erro ao comprar item:", error);
     res
       .status(500)
       .json({ mensagem: "Erro interno tente novamente mais tarde." });
