@@ -29,6 +29,9 @@ export function setupSocketIO(server: HttpServer) {
 
   io.on("connection", (socket) => {
     socket.use((packet, next) => {
+      console.log(
+        `Usuario: ${socket.data.usuario.nome}, emitiu o evento: ${packet[0]}, pelo socket: ${socket.id}`
+      );
       socketMiddleware(packet, socket, next);
       partidaMiddleware(packet, socket, next, eventosVerificacaoPartida);
     });
