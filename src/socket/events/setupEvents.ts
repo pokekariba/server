@@ -38,22 +38,25 @@ export const setupEvents = (socket: Socket, io: Server) => {
   console.log(
     `Usuario: ${socket.data.usuario.nome} setupEvents no socket: ${socket.id}`
   );
-  for (const event of typedKeys(clientEvents)) {
-    const existingListeners = socket.listeners(event);
 
-    if (existingListeners.length) {
+  if (!socket.data.__boundEvents) {
+    socket.data.__boundEvents = new Set();
+  }
+
+  for (const event of typedKeys(clientEvents)) {
+    if (socket.data.__boundEvents.has(event)) {
       console.log(
-        `Usuario: ${socket.data.usuario.nome} já tem listener para ${event} no socket: ${socket.id}, pulando.`
+        `Listener ${event} já registrado para ${socket.id}, pulando.`
       );
       continue;
     }
 
     const handler = clientEvents[event];
-    console.log(
-      `Usuario: ${socket.data.usuario.nome} cadastrando evento ${event} no socket: ${socket.id}`
-    );
+    socket.data.__boundEvents.add(event);
 
+    console.log(`Registrando listener ${event} para ${socket.id}`);
     socket.on(event, (payload) => {
+      console.log(`Recebido evento ${event} no socket ${socket.id}`);
       handler(socket, io, payload);
     });
   }
