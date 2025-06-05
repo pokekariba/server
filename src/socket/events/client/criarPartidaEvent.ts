@@ -13,9 +13,6 @@ import { TargetEventEnum } from "../../../@types/SocketEventsData";
 export const criarPartidaEvent: ClientEvent<
   SocketClientEventsEnum.CRIAR_PARTIDA
 > = async (socket, io, data) => {
-  console.log(
-    `Usuario: ${socket.data.usuario.nome}, emitiu o evento SocketClientEventsEnum.CRIAR_PARTIDA`
-  );
   const { nome, senha } = data;
   const idCriador = socket.data.usuario.id;
 

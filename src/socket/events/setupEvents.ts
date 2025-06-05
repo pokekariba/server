@@ -35,8 +35,14 @@ const serverEvents: { [K in SocketServerEventsEnum]: ServerEvent<K> } = {
 };
 
 export const setupEvents = (socket: Socket, io: Server) => {
+  console.log(
+    `Usuario: ${socket.data.usuario.nome} setupEvents no socket: ${socket.id}`
+  );
   for (const event of typedKeys(clientEvents)) {
     const handler = clientEvents[event];
+    console.log(
+      `Usuario: ${socket.data.usuario.nome} cadastrando evento ${event} no socket: ${socket.id}`
+    );
     socket.removeAllListeners(event);
     socket.on(event, (payload) => {
       handler(socket, io, payload);
