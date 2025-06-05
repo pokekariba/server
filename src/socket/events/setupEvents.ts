@@ -45,6 +45,9 @@ export const setupEvents = (socket: Socket, io: Server) => {
     );
     socket.removeAllListeners(event);
     socket.on(event, (payload) => {
+      console.log(
+        `Usuario: ${socket.data.usuario.nome} recebendo o evento ${event} no socket: ${socket.id}`
+      );
       handler(socket, io, payload);
     });
   }
