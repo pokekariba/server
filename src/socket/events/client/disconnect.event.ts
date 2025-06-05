@@ -8,6 +8,8 @@ import usuarioService from "../../../services/usuario.service";
 import partidaService from "../../../services/partida.service";
 
 export const disconnectEvent = async (socket: Socket, io: Server) => {
+  console.log(`Disconectando socket: ${socket.id}`);
+
   const usuario = socket.data.usuario as Usuario;
   if (!usuario) return;
   const partida = await prisma.partida.findFirst({
@@ -27,5 +29,9 @@ export const disconnectEvent = async (socket: Socket, io: Server) => {
       to: TargetEventEnum.ALL,
     });
   }
-  usuarioService.mudarStatusUsuario(StatusUsuario.offline, usuario.id, socket);
+  await usuarioService.mudarStatusUsuario(
+    StatusUsuario.offline,
+    usuario.id,
+    socket
+  );
 };

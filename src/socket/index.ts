@@ -34,43 +34,16 @@ export function setupSocketIO(server: HttpServer) {
 
   io.on("connection", (socket) => {
     socket.use((packet, next) => {
-      console.log(
-        `Usuario: ${socket.data.usuario.nome}, emitiu o evento: ${packet[0]}, pelo socket: ${socket.id}`
-      );
-      socketMiddleware(packet, socket, next);
-      partidaMiddleware(packet, socket, next, eventosVerificacaoPartida);
+      try {
+        socketMiddleware(socket);
+        partidaMiddleware(packet, socket, eventosVerificacaoPartida);
+        next();
+      } catch (err) {
+        next(err as Error);
+      }
     });
     console.log("Novo cliente conectado:", socket.id);
-    //setupEvents(socket, io);
-    socket.on("jogada", (payload) => {
-      console.log(`[${socket.id}] → Recebido evento: jogada`);
-      jogadaEvent(socket, io, payload);
-    });
-
-    socket.on("entrar_partida", (payload) => {
-      console.log(`[${socket.id}] → Recebido evento: entrar_partida`);
-      entrarPartidaEvent(socket, io, payload);
-    });
-
-    socket.on("iniciar_partida", (payload) => {
-      console.log(`[${socket.id}] → Recebido evento: iniciar_partida`);
-      iniciarPartidaEvent(socket, io, payload);
-    });
-
-    socket.on("criar_partida", (payload) => {
-      console.log(`[${socket.id}] → Recebido evento: criar_partida`);
-      criarPartidaEvent(socket, io, payload);
-    });
-
-    socket.on("desistir_partida", (payload) => {
-      console.log(`[${socket.id}] → Recebido evento: desistir_partida`);
-      desistirEvent(socket, io, payload);
-    });
-
-    socket.on("sair_partida", (payload) => {
-      console.log(`[${socket.id}] → Recebido evento: sair_partida`);
-      sairPartidaEvent(socket, io, payload);
-    });
+    setupEvents(socket, io);
     socket.on("error", (err: any) => {
       socket.emit("erro_evento", {
         mensagem: err.message,

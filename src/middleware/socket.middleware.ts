@@ -7,17 +7,11 @@ import {
   verificarToken,
 } from "../utils/jwt";
 
-type SocketIoPacket = [event: string, ...args: any[]];
-
-export const socketMiddleware = (
-  packet: SocketIoPacket,
-  socket: Socket,
-  next: NextFunction
-) => {
+export const socketMiddleware = (socket: Socket) => {
   const token = socket.handshake.auth?.token;
 
   if (!token) {
-    return next(socketError("Token não fornecido", 401));
+    throw socketError("Token não fornecido", 401);
   }
 
   try {
@@ -29,9 +23,8 @@ export const socketMiddleware = (
   } catch (err: any) {
     console.log("Erro ao verificar token no handshake:", err);
     if (err.name === "TokenExpiredError") {
-      return next(socketError("Sessão expirada, faça login novamente", 401));
+      throw socketError("Sessão expirada, faça login novamente", 401);
     }
-    return next(socketError("Token inválido", 401));
+    throw socketError("Token inválido", 401);
   }
-  next();
 };
