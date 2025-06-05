@@ -27,6 +27,7 @@ export const sairPartidaEvent: ClientEvent<
     socket
   );
   socket.leave(String(idPartida));
+  socket.join("usuarios_online");
   emitEvent(socket, io, SocketServerEventsEnum.SALA_ATUALIZADA, { idPartida });
   emitEvent(socket, io, SocketServerEventsEnum.LISTAR_PARTIDAS, {
     to: TargetEventEnum.ALL,

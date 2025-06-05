@@ -28,13 +28,15 @@ export const criarPartidaEvent: ClientEvent<
     return;
   }
 
-  usuarioService.mudarStatusUsuario(
+  await usuarioService.mudarStatusUsuario(
     StatusUsuario.em_partida,
     Number(idCriador),
     socket
   );
 
   socket.join(partida.id.toString());
+
+  socket.leave("usuarios_online");
 
   emitEvent(socket, io, SocketServerEventsEnum.SALA_ATUALIZADA, {
     idPartida: partida.id,

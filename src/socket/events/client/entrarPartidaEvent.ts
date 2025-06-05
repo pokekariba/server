@@ -41,6 +41,7 @@ export const entrarPartidaEvent: ClientEvent<
   }
   await partidaService.preencherVaga(partida, Number(usuario.id));
   socket.join(String(usuario.id));
+  socket.leave("usuarios_online");
   await usuarioService.mudarStatusUsuario(
     StatusUsuario.em_partida,
     Number(usuario.id),

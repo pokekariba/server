@@ -13,16 +13,11 @@ import {
   ResumoPartida,
 } from "../@types/EstadoPartida";
 import prisma from "../config/prisma.config";
-import { Server } from "socket.io";
 import { criptografarString } from "../utils/criptografia";
 
 const estadoPartidasAndamento = new Map<number, EstadoPartida>();
-let io!: Server;
 
 const partidaService = {
-  init: (server: Server): void => {
-    io = server;
-  },
   listarPartidasEmEspera: async (): Promise<ResumoPartida[]> => {
     const listaPartidas = await prisma.partida.findMany({
       select: {

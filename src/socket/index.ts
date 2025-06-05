@@ -25,8 +25,6 @@ export function setupSocketIO(server: HttpServer) {
     path: "/jogo",
   });
 
-  partidaService.init(io);
-
   io.use(handShakeMiddleware);
 
   io.on("connection", (socket) => {

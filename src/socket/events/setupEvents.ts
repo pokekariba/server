@@ -37,7 +37,7 @@ const serverEvents: { [K in SocketServerEventsEnum]: ServerEvent<K> } = {
 export const setupEvents = (socket: Socket, io: Server) => {
   for (const event of typedKeys(clientEvents)) {
     const handler = clientEvents[event];
-
+    socket.removeAllListeners(event);
     socket.on(event, (payload) => {
       handler(socket, io, payload);
     });
