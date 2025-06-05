@@ -9,7 +9,6 @@ import {
   SocketServerEventsEnum,
 } from "../@types/SocketEvents";
 import { TargetEventEnum } from "../@types/SocketEventsData";
-import partidaService from "../services/partida.service";
 import { partidaMiddleware } from "../middleware/partida.middleware";
 
 const eventosVerificacaoPartida: SocketClientEventsEnum[] = [
