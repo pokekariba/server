@@ -199,7 +199,7 @@ const partidaService = {
     estadoPartidasAndamento.set(idPartida, estadoPartida);
 
     for (const jogador of jogadores) {
-      comprarCartas(idPartida, jogador.id);
+      comprarCartas(jogador.id, idPartida);
     }
 
     await salvarPartida(idPartida);
