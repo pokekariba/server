@@ -199,7 +199,7 @@ const partidaService = {
     estadoPartidasAndamento.set(idPartida, estadoPartida);
 
     for (const jogador of jogadores) {
-      comprarCartas(jogador.id, idPartida);
+      comprarCartas(jogador, idPartida);
     }
 
     await salvarPartida(idPartida);
@@ -289,7 +289,7 @@ const partidaService = {
     }
     partida.rodada++;
 
-    comprarCartas(jogador.id, partida.idPartida);
+    comprarCartas(jogador, partida.idPartida);
 
     await salvarPartida(partida.idPartida);
 
@@ -354,14 +354,14 @@ const embaralhar = <T>(array: T[]): T[] => {
 const gerarBaralho = (partidaId: number): Carta[] => {
   const cartasBase = [
     { valor: 0, quantidade: 2 },
-    { valor: 1, quantidade: 8 },
-    { valor: 2, quantidade: 8 },
-    { valor: 3, quantidade: 8 },
-    { valor: 4, quantidade: 8 },
-    { valor: 5, quantidade: 8 },
-    { valor: 6, quantidade: 8 },
-    { valor: 7, quantidade: 8 },
-    { valor: 8, quantidade: 8 },
+    { valor: 1, quantidade: 2 },
+    { valor: 2, quantidade: 2 },
+    { valor: 3, quantidade: 2 },
+    { valor: 4, quantidade: 2 },
+    { valor: 5, quantidade: 2 },
+    { valor: 6, quantidade: 2 },
+    { valor: 7, quantidade: 2 },
+    { valor: 8, quantidade: 2 },
   ];
 
   let baralho: Carta[] = [];
@@ -455,39 +455,32 @@ const salvarPartida = async (partidaId: number): Promise<void> => {
   }
 };
 
-const comprarCartas = (idJogador: number, idPartida: number): void => {
+const comprarCartas = (jogador: JogadorPartida, idPartida: number): void => {
   const partida = estadoPartidasAndamento.get(idPartida);
 
   if (!partida) {
     throw new Error(`Partida com ID ${idPartida} não encontrada.`);
   }
 
-  const jogador = partida.jogadores.find((j) => j.id === idJogador);
-
-  if (!jogador) {
-    throw new Error(
-      `Jogador com ID ${idJogador} não encontrado na partida ${idPartida}.`
-    );
-  }
-
-  const maoJogador = jogador.cartas || [];
+  const maoJogador =
+    jogador.cartas.filter((carta) => carta.tipo === TipoCarta.mao) || [];
 
   const cartasParaComprar = Math.min(
     5 - maoJogador.length,
     partida.baralho.length
   );
 
-  if (cartasParaComprar <= 0) return;
-
   const cartasCompradas = partida.baralho.splice(-cartasParaComprar);
 
-  cartasCompradas.forEach((carta, index) => {
+  const novaMao = [...maoJogador, ...cartasCompradas];
+
+  novaMao.forEach((carta, index) => {
     carta.tipo = TipoCarta.mao;
-    carta.jogador_partida_id = idJogador;
-    carta.posicao = maoJogador.length + index;
+    carta.jogador_partida_id = jogador.id;
+    carta.posicao = index;
   });
 
-  jogador.cartas = [...maoJogador, ...cartasCompradas];
+  jogador.cartas = [...new Set<Carta>([...jogador.cartas, ...novaMao])];
 };
 
 export default partidaService;

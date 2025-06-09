@@ -32,7 +32,9 @@ export const rodadaCalculadaEvent: ServerEvent<
 
   for (const [i, s] of sockets.entries()) {
     const isJogador = s.data.usuario.id === socket.data.usuario.id;
-    const jogador = partida.jogadores.find((j) => j.usuario_id === +s.data.usuario.id);
+    const jogador = partida.jogadores.find(
+      (j) => j.usuario_id === +s.data.usuario.id
+    );
     if (!isJogador && data.reconexao) continue;
     const idAdversario = sockets[+!i].data.usuario.id;
     const maoJogador = maos.get(s.data.usuario.id) || [];
@@ -46,7 +48,8 @@ export const rodadaCalculadaEvent: ServerEvent<
       tabuleiro: partida.tabuleiro,
       rodada: partida.rodada,
       baralho: partida.baralho.length,
-      jogadaAdversario: data.jogada,
+      jogadaAdversario: isJogador ? undefined : data.jogada,
+      valorLogadaAdversario: isJogador ? undefined : data.valorJogada,
       suaVez: partida.rodada % 2 === jogador!.ordem_jogada % 2,
       maoJogador,
       maoAdversario,
@@ -81,7 +84,7 @@ const separarCartasPorTipo = (cartas: Carta[]) => {
       if (carta.tipo === TipoCarta.mao) {
         acc.mao[carta.posicao] = carta;
       } else {
-        acc.capturada[carta.valor]++;
+        acc.capturada[carta.valor] += 1;
       }
       return acc;
     },

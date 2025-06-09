@@ -34,6 +34,7 @@ export interface SocketServerEventsData {
   };
   [SocketServerEventsEnum.RODADA_CALCULADA]: {
     idPartida: number;
+    valorJogada?: number;
     reconexao?: boolean;
     jogada?: Carta[];
   };
@@ -54,6 +55,7 @@ export interface SocketServerEventsPayload {
     rodada: number;
     tabuleiro: Carta[][];
     jogadaAdversario?: Carta[];
+    valorLogadaAdversario?: number;
     pontuacaoJogador: number;
     pontuacaoAdversario: number;
     cartasCapturadas: number[];

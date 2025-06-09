@@ -1,3 +1,4 @@
+import { TipoCarta } from "@prisma/client";
 import {
   ClientEvent,
   SocketClientEventsEnum,
@@ -46,12 +47,13 @@ export const jogadaEvent: ClientEvent<SocketClientEventsEnum.JOGADA> = async (
     emitEvent(socket, io, SocketServerEventsEnum.RODADA_CALCULADA, {
       idPartida: partida.idPartida,
       jogada: cartasReais,
+      valorJogada: data.valorCamaleao,
     });
-    if (
-      partida.baralho.length === 0 &&
-      partida.jogadores.every((j) => j.cartas.length === 0)
-    ) {
-      partidaService.finalizarPartida(partida.idPartida);
+    const cartasNaMao = partida.jogadores
+      .flatMap((j) => j.cartas.flat())
+      .some((c) => c.tipo === TipoCarta.mao);
+    if (partida.baralho.length === 0 && cartasNaMao) {
+      await partidaService.finalizarPartida(partida.idPartida);
       emitEvent(socket, io, SocketServerEventsEnum.FINAL_PARTIDA, {
         idPartida: partida.idPartida,
         motivo: MotivoFinal.NORMAL,
