@@ -64,11 +64,11 @@ const separarInformacoesPorJogador = (jogadores: JogadorPartida[]) => {
   let pontuacoes = new Map<number, number>();
 
   for (const jogador of jogadores) {
-    const idJogador = jogador.id;
+    const idUsuario = jogador.usuario_id;
     const { mao, capturada } = separarCartasPorTipo(jogador.cartas);
-    maos.set(idJogador, mao);
-    capturadas.set(idJogador, capturada);
-    pontuacoes.set(idJogador, jogador.pontuacao);
+    maos.set(idUsuario, mao);
+    capturadas.set(idUsuario, capturada);
+    pontuacoes.set(idUsuario, jogador.pontuacao);
   }
 
   return { maos, capturadas, pontuacoes };
