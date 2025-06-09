@@ -47,7 +47,7 @@ export const rodadaCalculadaEvent: ServerEvent<
       rodada: partida.rodada,
       baralho: partida.baralho.length,
       jogadaAdversario: data.jogada,
-      suaVez: partida.rodada % 2 === jogador!.ordem_jogada - 1,
+      suaVez: partida.rodada % 2 === jogador!.ordem_jogada % 2,
       maoJogador,
       maoAdversario,
       cartasCapturadas,
