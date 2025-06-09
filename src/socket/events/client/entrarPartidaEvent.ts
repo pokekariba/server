@@ -39,8 +39,18 @@ export const entrarPartidaEvent: ClientEvent<
     socketError("Senha incorreta.", 403, socket);
     return;
   }
+  try {
+    socket.join(String(partida.id));
+  } catch (error) {
+    socketError(
+      "Não foi possivel se conectar a sala tente novamente. " +
+        (error as Error).message,
+      500,
+      socket
+    );
+    return;
+  }
   await partidaService.preencherVaga(partida, Number(usuario.id));
-  socket.join(String(usuario.id));
   socket.leave("usuarios_online");
   await usuarioService.mudarStatusUsuario(
     StatusUsuario.em_partida,

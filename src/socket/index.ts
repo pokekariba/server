@@ -10,12 +10,6 @@ import {
 } from "../@types/SocketEvents";
 import { TargetEventEnum } from "../@types/SocketEventsData";
 import { partidaMiddleware } from "../middleware/partida.middleware";
-import { jogadaEvent } from "./events/client/jogadaEvent";
-import { entrarPartidaEvent } from "./events/client/entrarPartidaEvent";
-import { criarPartidaEvent } from "./events/client/criarPartidaEvent";
-import { desistirEvent } from "./events/client/desistirEvent";
-import { iniciarPartidaEvent } from "./events/client/iniciarPartidaEvent";
-import { sairPartidaEvent } from "./events/client/sairPartidaEvent";
 
 const eventosVerificacaoPartida: SocketClientEventsEnum[] = [
   SocketClientEventsEnum.DESISTIR_PARTIDA,
