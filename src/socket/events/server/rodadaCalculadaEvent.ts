@@ -32,6 +32,7 @@ export const rodadaCalculadaEvent: ServerEvent<
 
   for (const [i, s] of sockets.entries()) {
     const isJogador = s.data.usuario.id === socket.data.usuario.id;
+    const jogador = partida.jogadores.find((j) => j.usuario_id === +s.data.usuario.id);
     if (!isJogador && data.reconexao) continue;
     const idAdversario = sockets[+!i].data.usuario.id;
     const maoJogador = maos.get(s.data.usuario.id) || [];
@@ -46,7 +47,7 @@ export const rodadaCalculadaEvent: ServerEvent<
       rodada: partida.rodada,
       baralho: partida.baralho.length,
       jogadaAdversario: data.jogada,
-      suaVez: !isJogador,
+      suaVez: partida.rodada % 2 === jogador!.ordem_jogada - 1,
       maoJogador,
       maoAdversario,
       cartasCapturadas,
