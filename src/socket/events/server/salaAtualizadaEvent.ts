@@ -26,7 +26,7 @@ export const salaAtualizadaEvent: ServerEvent<
     nome: partida.nome,
     vagas: partida.vagas,
     senha: !!partida.senha,
-    donoPartida: partida.criador_id,
+    donoPartida: partida.criador.nome,
     jogadores: [],
   };
 

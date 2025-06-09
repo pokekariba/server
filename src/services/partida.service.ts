@@ -94,6 +94,9 @@ const partidaService = {
       where: {
         id: idPartida,
       },
+      include: {
+        criador: true,
+      },
     });
   },
   criarPartida: async (

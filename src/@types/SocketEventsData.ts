@@ -69,7 +69,7 @@ export interface SocketServerEventsPayload {
     motivo: MotivoFinal;
   };
   [SocketServerEventsEnum.SALA_ATUALIZADA]: ResumoPartida & {
-    donoPartida: number;
+    donoPartida: string;
     jogadores: JogadoresSala[];
   };
 }
