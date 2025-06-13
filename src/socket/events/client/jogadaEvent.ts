@@ -30,20 +30,30 @@ export const jogadaEvent: ClientEvent<SocketClientEventsEnum.JOGADA> = async (
     socketError("Jogador não encontrado na partida.", 404, socket);
     return;
   }
-  const cartasReais = jogador.cartas.filter((carta) =>
-    data.idCartas.includes(carta.id)
-  );
-  if (!cartasReais.length || cartasReais.length !== data.idCartas.length) {
-    socketError("Carta não encontrada na mão do jogador.", 404, socket);
-    return;
-  }
   try {
-    await partidaService.realizarJogada(
-      partida,
-      cartasReais,
-      jogador,
-      data.valorCamaleao
-    );
+    let cartasReais;
+    if (
+      !data.idCartas.length &&
+      !jogador.cartas.some((c) => c.tipo === TipoCarta.mao)
+    ) {
+      partida.rodada++;
+    } else {
+      cartasReais = jogador.cartas.filter((carta) =>
+        data.idCartas.includes(carta.id)
+      );
+      if (!cartasReais.length || cartasReais.length !== data.idCartas.length) {
+        socketError("Carta não encontrada na mão do jogador.", 404, socket);
+        return;
+      }
+
+      await partidaService.realizarJogada(
+        partida,
+        cartasReais,
+        jogador,
+        data.valorCamaleao
+      );
+    }
+
     emitEvent(socket, io, SocketServerEventsEnum.RODADA_CALCULADA, {
       idPartida: partida.idPartida,
       jogada: cartasReais,
@@ -52,7 +62,9 @@ export const jogadaEvent: ClientEvent<SocketClientEventsEnum.JOGADA> = async (
     const cartasNaMao = partida.jogadores
       .flatMap((j) => j.cartas.flat())
       .some((c) => c.tipo === TipoCarta.mao);
-    if (partida.baralho.length === 0 && cartasNaMao) {
+
+    if (partida.baralho.length === 0 && !cartasNaMao) {
+      console.log(cartasNaMao);
       await partidaService.finalizarPartida(partida.idPartida);
       emitEvent(socket, io, SocketServerEventsEnum.FINAL_PARTIDA, {
         idPartida: partida.idPartida,

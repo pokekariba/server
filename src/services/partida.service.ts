@@ -297,7 +297,6 @@ const partidaService = {
   },
   finalizarPartida: async (idPartida: number): Promise<void> => {
     const partida = estadoPartidasAndamento.get(idPartida);
-
     if (!partida) {
       throw new Error(`Partida com ID ${idPartida} não encontrada.`);
     }
@@ -309,7 +308,7 @@ const partidaService = {
 
     let ganhador_id: number;
     if (vencedores.length === 1) {
-      ganhador_id = vencedores[0].id;
+      ganhador_id = vencedores[0].usuario_id;
     }
 
     await prisma.$transaction(async (tx) => {
@@ -354,14 +353,14 @@ const embaralhar = <T>(array: T[]): T[] => {
 const gerarBaralho = (partidaId: number): Carta[] => {
   const cartasBase = [
     { valor: 0, quantidade: 2 },
-    { valor: 1, quantidade: 2 },
-    { valor: 2, quantidade: 2 },
-    { valor: 3, quantidade: 2 },
-    { valor: 4, quantidade: 2 },
-    { valor: 5, quantidade: 2 },
-    { valor: 6, quantidade: 2 },
-    { valor: 7, quantidade: 2 },
-    { valor: 8, quantidade: 2 },
+    { valor: 1, quantidade: 8 },
+    { valor: 2, quantidade: 8 },
+    { valor: 3, quantidade: 8 },
+    { valor: 4, quantidade: 8 },
+    { valor: 5, quantidade: 8 },
+    { valor: 6, quantidade: 8 },
+    { valor: 7, quantidade: 8 },
+    { valor: 8, quantidade: 8 },
   ];
 
   let baralho: Carta[] = [];

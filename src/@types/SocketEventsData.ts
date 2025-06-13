@@ -67,7 +67,7 @@ export interface SocketServerEventsPayload {
   };
   [SocketServerEventsEnum.FINAL_PARTIDA]: {
     vencedor: string;
-    pontuacao: Map<string, number>;
+    pontuacao: [string, number][];
     motivo: MotivoFinal;
   };
   [SocketServerEventsEnum.SALA_ATUALIZADA]: ResumoPartida & {
