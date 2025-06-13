@@ -403,40 +403,43 @@ const salvarPartida = async (partidaId: number): Promise<void> => {
 
   const cartasSaoNovas = cartasDoJogo[0].id === undefined;
 
-  const cartasNovas = await prisma.$transaction(async (xt) => {
-    await xt.partida.update({
-      where: { id: partidaId },
-      data: {
-        status: partida.status,
-        jogadores: {
-          updateMany: partida.jogadores.map((jogador) => ({
-            where: { id: jogador.id },
-            data: {
-              pontuacao: jogador.pontuacao,
-            },
-          })),
+  const cartasNovas = await prisma.$transaction(
+    async (xt) => {
+      await xt.partida.update({
+        where: { id: partidaId },
+        data: {
+          status: partida.status,
+          jogadores: {
+            updateMany: partida.jogadores.map((jogador) => ({
+              where: { id: jogador.id },
+              data: {
+                pontuacao: jogador.pontuacao,
+              },
+            })),
+          },
         },
-      },
-    });
-    if (cartasSaoNovas) {
-      return await xt.carta.createManyAndReturn({
-        data: cartasDoJogo,
       });
-    } else {
-      await Promise.all(
-        cartasDoJogo.map((carta) =>
-          xt.carta.update({
-            where: { id: carta.id },
-            data: {
-              posicao: carta.posicao,
-              jogador_partida_id: carta.jogador_partida_id,
-              tipo: carta.tipo,
-            },
-          })
-        )
-      );
-    }
-  });
+      if (cartasSaoNovas) {
+        return await xt.carta.createManyAndReturn({
+          data: cartasDoJogo,
+        });
+      } else {
+        await Promise.all(
+          cartasDoJogo.map((carta) =>
+            xt.carta.update({
+              where: { id: carta.id },
+              data: {
+                posicao: carta.posicao,
+                jogador_partida_id: carta.jogador_partida_id,
+                tipo: carta.tipo,
+              },
+            })
+          )
+        );
+      }
+    },
+    { timeout: 10000 }
+  );
 
   if (cartasSaoNovas && cartasNovas) {
     for (const cartaNova of cartasNovas) {
