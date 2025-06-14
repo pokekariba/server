@@ -42,8 +42,14 @@ export const jogadaEvent: ClientEvent<SocketClientEventsEnum.JOGADA> = async (
         data.idCartas.includes(carta.id)
       );
       if (!cartasReais.length || cartasReais.length !== data.idCartas.length) {
-        socketError("Carta não encontrada na mão do jogador.", 404, socket);
-        return;
+        console.log(!cartasReais.length);
+        console.log(cartasReais);
+        console.log(cartasReais.length !== data.idCartas.length);
+        throw socketError(
+          "Carta não encontrada na mão do jogador.",
+          404,
+          socket
+        );
       }
 
       await partidaService.realizarJogada(

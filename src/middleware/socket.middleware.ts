@@ -7,8 +7,10 @@ import {
   verificarToken,
 } from "../utils/jwt";
 
-export const socketMiddleware = (socket: Socket) => {
-  const token = socket.handshake.auth?.token;
+type SocketIoPacket = [event: string, ...args: any[]];
+
+export const socketMiddleware = (packet: SocketIoPacket, socket: Socket) => {
+  const token = packet[2];
 
   if (!token) {
     throw socketError("Token não fornecido", 401);

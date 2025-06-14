@@ -29,7 +29,7 @@ export function setupSocketIO(server: HttpServer) {
   io.on("connection", (socket) => {
     socket.use((packet, next) => {
       try {
-        socketMiddleware(socket);
+        socketMiddleware(packet, socket);
         partidaMiddleware(packet, socket, eventosVerificacaoPartida);
         next();
       } catch (err) {
