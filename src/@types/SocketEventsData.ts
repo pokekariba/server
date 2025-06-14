@@ -55,7 +55,7 @@ export interface SocketServerEventsPayload {
     rodada: number;
     tabuleiro: Carta[][];
     jogadaAdversario?: Carta[];
-    valorLogadaAdversario?: number;
+    valorJogadaAdversario?: number;
     pontuacaoJogador: number;
     pontuacaoAdversario: number;
     cartasCapturadas: number[];

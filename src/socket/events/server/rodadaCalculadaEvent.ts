@@ -49,7 +49,7 @@ export const rodadaCalculadaEvent: ServerEvent<
       rodada: partida.rodada,
       baralho: partida.baralho.length,
       jogadaAdversario: isJogador ? undefined : data.jogada,
-      valorLogadaAdversario: isJogador ? undefined : data.valorJogada,
+      valorJogadaAdversario: isJogador ? undefined : data.valorJogada,
       suaVez: partida.rodada % 2 === jogador!.ordem_jogada % 2,
       maoJogador,
       maoAdversario,
