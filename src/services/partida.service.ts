@@ -232,6 +232,7 @@ const partidaService = {
     jogador: JogadorPartida,
     valorCamaleao?: number
   ) => {
+    const cartasAlteradas = new Set(cartasJogadas);
     const tabuleiro = partida.tabuleiro;
     jogador.cartas = jogador.cartas.filter(
       (carta) => !cartasJogadas.includes(carta)
@@ -281,6 +282,7 @@ const partidaService = {
           carta.tipo = TipoCarta.capturado;
           carta.jogador_partida_id = jogador.id;
           carta.posicao = 0;
+          cartasAlteradas.add(carta);
         });
 
         jogador.cartas.push(...cartasCapturadas);
@@ -291,7 +293,9 @@ const partidaService = {
 
     comprarCartas(jogador, partida.idPartida);
 
-    await salvarPartida(partida.idPartida);
+    jogador.cartas.forEach((carta) => cartasAlteradas.add(carta));
+
+    await salvarPartida(partida.idPartida, Array.from(cartasAlteradas));
 
     return partida;
   },
@@ -385,7 +389,10 @@ const gerarBaralho = (partidaId: number): Carta[] => {
   return baralho;
 };
 
-const salvarPartida = async (partidaId: number): Promise<void> => {
+const salvarPartida = async (
+  partidaId: number,
+  cartasAlteradas?: Carta[]
+): Promise<void> => {
   const partida = estadoPartidasAndamento.get(partidaId);
 
   if (!partida) {
@@ -400,8 +407,6 @@ const salvarPartida = async (partidaId: number): Promise<void> => {
   for (const jogador of partida.jogadores) {
     cartasDoJogo.push(...jogador.cartas);
   }
-
-  const cartasSaoNovas = cartasDoJogo[0].id === undefined;
 
   const cartasNovas = await prisma.$transaction(
     async (xt) => {
@@ -419,13 +424,13 @@ const salvarPartida = async (partidaId: number): Promise<void> => {
           },
         },
       });
-      if (cartasSaoNovas) {
+      if (!cartasAlteradas) {
         return await xt.carta.createManyAndReturn({
           data: cartasDoJogo,
         });
       } else {
         await Promise.all(
-          cartasDoJogo.map((carta) =>
+          cartasAlteradas.map((carta) =>
             xt.carta.update({
               where: { id: carta.id },
               data: {
@@ -441,7 +446,7 @@ const salvarPartida = async (partidaId: number): Promise<void> => {
     { timeout: 10000 }
   );
 
-  if (cartasSaoNovas && cartasNovas) {
+  if (!cartasAlteradas && cartasNovas) {
     for (const cartaNova of cartasNovas) {
       const cartaAntiga = cartasDoJogo.find(
         (c) =>
