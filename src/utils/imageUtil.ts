@@ -1,7 +1,7 @@
 import sharp from "sharp";
 
-export const gerarNomeImagem = (itemId: number, index: number): string => {
-  return `item_${itemId}_${Date.now()}_${index}`;
+export const gerarNomeImagem = (itemId: number, nome: string): string => {
+  return `item_${itemId}_${nome}`;
 };
 
 export const sanitizarImagem = async (buffer: Buffer): Promise<Buffer> => {

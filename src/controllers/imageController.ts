@@ -21,21 +21,25 @@ export const adicionarImagemItem = async (req: Request, res: Response) => {
     res.status(404).json({ message: "Item não encontrado." });
     return;
   }
+  processUploadBackground(files, idItem);
+  res.status(201).json({ message: "Upload iniciado" });
+};
 
+const processUploadBackground = async (
+  files: Express.Multer.File[],
+  idItem: number
+) => {
   try {
-    const uploadPromises = files.map(async (file, index) => {
+    const uploadPromises = files.map(async (file) => {
       const bufferSanitizado = await sanitizarImagem(file.buffer);
-      const nome = gerarNomeImagem(idItem, index);
+      const nome = gerarNomeImagem(idItem, file.originalname);
       const folder = "itens/" + idItem;
       return uploadParaCloudinary(bufferSanitizado, folder, nome);
     });
-
-    const imageUrls = await Promise.all(uploadPromises);
-
-    res.status(201).json({ imagens: imageUrls });
+    await Promise.all(uploadPromises);
+    console.log("Upload finalizado com sucesso!");
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: "Erro ao processar imagens" });
+    console.error("Erro no processamento em background:", err);
   }
 };
 
