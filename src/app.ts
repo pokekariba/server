@@ -22,7 +22,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json());
-app.use("/jogo", autenticador, protegidas);
+app.use("/logged", autenticador, protegidas);
 app.use(authRoutes);
 
 export default app;
