@@ -6,14 +6,14 @@ import {
 } from "../utils/jwt";
 import { compararString, criptografarString } from "../utils/criptografia";
 import nodemailer from "nodemailer";
-import { CargoUsuario, StatusUsuario } from "@prisma/client";
+import { StatusUsuario } from "@prisma/client";
 import usuarioService from "../services/usuario.service";
 
 export const login = async (req: Request, res: Response): Promise<void> => {
   try {
     const { usuario, senha } = req.body;
 
-    const user = await usuarioService.buscarUsuario({nome: usuario});
+    const user = await usuarioService.buscarUsuario({ nome: usuario });
 
     if (!user) {
       res
@@ -65,7 +65,7 @@ export const loginBackoffice = async (
   try {
     const { usuario, senha } = req.body;
 
-    const user = await usuarioService.buscarUsuario({nome: usuario});
+    const user = await usuarioService.buscarUsuario({ nome: usuario });
 
     if (!user) {
       res
@@ -138,7 +138,11 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
       return;
     }
 
-    const usuarioExistente = await usuarioService.buscarUsuario({email,nome: usuario, operador: "or"});
+    const usuarioExistente = await usuarioService.buscarUsuario({
+      email,
+      nome: usuario,
+      operador: "or",
+    });
 
     if (usuarioExistente) {
       res.status(400).json({ mensagem: "E-mail ou usuário já cadastrado." });
@@ -147,7 +151,11 @@ export const cadastro = async (req: Request, res: Response): Promise<void> => {
 
     const senhaCriptografada = await criptografarString(senha);
 
-    const novoUsuario = await usuarioService.criarUsuario(email,usuario,senhaCriptografada);
+    const novoUsuario = await usuarioService.criarUsuario(
+      email,
+      usuario,
+      senhaCriptografada
+    );
 
     res.sendStatus(200);
   } catch (erro) {
@@ -169,7 +177,7 @@ export const recuperarSenha = async (
       return;
     }
 
-    const user = await usuarioService.buscarUsuario({email,nome: usuario});
+    const user = await usuarioService.buscarUsuario({ email, nome: usuario });
 
     if (!user) {
       res.status(404).json({ mensagem: "Usuário inexistente." });
