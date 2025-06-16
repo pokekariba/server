@@ -1,4 +1,4 @@
-import { TipoCarta } from "@prisma/client";
+import { TipoCarta } from "../../../@types/Carta";
 import {
   ClientEvent,
   SocketClientEventsEnum,
@@ -41,16 +41,8 @@ export const jogadaEvent: ClientEvent<SocketClientEventsEnum.JOGADA> = async (
       cartasReais = jogador.cartas.filter((carta) =>
         data.idCartas.includes(carta.id)
       );
-      if (!cartasReais.length || cartasReais.length !== data.idCartas.length) {
-        console.log(!cartasReais.length);
-        console.log(cartasReais);
-        console.log(cartasReais.length !== data.idCartas.length);
-        throw socketError(
-          "Carta não encontrada na mão do jogador.",
-          404,
-          socket
-        );
-      }
+      if (!cartasReais.length || cartasReais.length !== data.idCartas.length)
+        return;
 
       await partidaService.realizarJogada(
         partida,

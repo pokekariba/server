@@ -1,11 +1,9 @@
 import { StatusPartida, StatusUsuario, Usuario } from "@prisma/client";
 import { Server, Socket } from "socket.io";
-import { emitEvent } from "../setupEvents";
-import { SocketServerEventsEnum } from "../../../@types/SocketEvents";
-import { TargetEventEnum } from "../../../@types/SocketEventsData";
 import prisma from "../../../config/prisma.config";
 import usuarioService from "../../../services/usuario.service";
-import partidaService from "../../../services/partida.service";
+import { desistirEvent } from "./desistirEvent";
+import { sairPartidaEvent } from "./sairPartidaEvent";
 
 export const disconnectEvent = async (socket: Socket, io: Server) => {
   console.log(`Disconectando socket: ${socket.id}`);
@@ -19,15 +17,17 @@ export const disconnectEvent = async (socket: Socket, io: Server) => {
           usuario_id: usuario.id,
         },
       },
-      status: StatusPartida.em_espera,
+      NOT: {
+        status: StatusPartida.finalizado,
+      },
     },
   });
-  if (usuario.status === StatusUsuario.em_partida && !partida) return;
   if (partida) {
-    await partidaService.sairDaPartida(partida, usuario.id);
-    emitEvent(socket, io, SocketServerEventsEnum.LISTAR_PARTIDAS, {
-      to: TargetEventEnum.ALL,
-    });
+    if (partida.status === StatusPartida.em_espera) {
+      await sairPartidaEvent(socket, io, { idPartida: partida.id });
+    } else {
+      await desistirEvent(socket, io, { idPartida: partida.id });
+    }
   }
   await usuarioService.mudarStatusUsuario(
     StatusUsuario.offline,

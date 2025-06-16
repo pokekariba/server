@@ -1,6 +1,7 @@
-import { Carta, Partida, Prisma, Usuario } from "@prisma/client";
+import { Usuario } from "@prisma/client";
 import { SocketClientEventsEnum, SocketServerEventsEnum } from "./SocketEvents";
-import { EstadoPartida, ResumoPartida } from "./EstadoPartida";
+import { ResumoPartida } from "./EstadoPartida";
+import { Carta } from "./Carta";
 
 export interface SocketClientEventsData {
   [SocketClientEventsEnum.JOGADA]: {

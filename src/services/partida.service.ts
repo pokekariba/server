@@ -1,19 +1,18 @@
 import {
-  Carta,
   Partida,
   Prisma,
   StatusPartida,
   StatusUsuario,
-  TipoCarta,
   Usuario,
 } from "@prisma/client";
 import {
   EstadoPartida,
-  JogadorPartida,
+  JogadorComCarta,
   ResumoPartida,
 } from "../@types/EstadoPartida";
 import prisma from "../config/prisma.config";
 import { criptografarString } from "../utils/criptografia";
+import { Carta, TipoCarta } from "../@types/Carta";
 
 const estadoPartidasAndamento = new Map<number, EstadoPartida>();
 
@@ -153,12 +152,6 @@ const partidaService = {
         where: { usuario_id: Number(idDesistente), partida_id: idPartida },
         data: { pontuacao: 0 },
       });
-
-      await dx.carta.deleteMany({
-        where: {
-          partida_id: idPartida,
-        },
-      });
     });
     estadoPartidasAndamento.delete(idPartida);
   },
@@ -229,10 +222,9 @@ const partidaService = {
   realizarJogada: async (
     partida: EstadoPartida,
     cartasJogadas: Carta[],
-    jogador: JogadorPartida,
+    jogador: JogadorComCarta,
     valorCamaleao?: number
   ) => {
-    const cartasAlteradas = new Set(cartasJogadas);
     const tabuleiro = partida.tabuleiro;
     jogador.cartas = jogador.cartas.filter(
       (carta) => !cartasJogadas.includes(carta)
@@ -282,7 +274,6 @@ const partidaService = {
           carta.tipo = TipoCarta.capturado;
           carta.jogador_partida_id = jogador.id;
           carta.posicao = 0;
-          cartasAlteradas.add(carta);
         });
 
         jogador.cartas.push(...cartasCapturadas);
@@ -293,9 +284,7 @@ const partidaService = {
 
     comprarCartas(jogador, partida.idPartida);
 
-    jogador.cartas.forEach((carta) => cartasAlteradas.add(carta));
-
-    await salvarPartida(partida.idPartida, Array.from(cartasAlteradas));
+    await salvarPartida(partida.idPartida);
 
     return partida;
   },
@@ -324,7 +313,6 @@ const partidaService = {
           data_fim: new Date(),
         },
       });
-
       await tx.usuario.updateMany({
         where: {
           jogadorPartidas: {
@@ -334,10 +322,6 @@ const partidaService = {
           },
         },
         data: { status: StatusUsuario.online },
-      });
-
-      await tx.carta.deleteMany({
-        where: { partida_id: idPartida },
       });
     });
 
@@ -371,98 +355,52 @@ const gerarBaralho = (partidaId: number): Carta[] => {
 
   for (const carta of cartasBase) {
     for (let i = 0; i < carta.quantidade; i++) {
-      const cartaParaInserir = {
+      const cartaParaInserir: Carta = {
+        id: 0,
         partida_id: partidaId,
-        jogador_partida_id: null,
         valor: carta.valor,
         tipo: TipoCarta.baralho,
         posicao: 0,
       };
-      baralho.push(cartaParaInserir as Carta);
+      baralho.push(cartaParaInserir);
     }
   }
 
   baralho = embaralhar(baralho);
 
-  baralho = baralho.map((carta, index) => ({ ...carta, posicao: index }));
+  baralho = baralho.map((carta, index) => ({
+    ...carta,
+    posicao: index,
+    id: index,
+  }));
 
   return baralho;
 };
 
-const salvarPartida = async (
-  partidaId: number,
-  cartasAlteradas?: Carta[]
-): Promise<void> => {
+const salvarPartida = async (partidaId: number): Promise<void> => {
   const partida = estadoPartidasAndamento.get(partidaId);
 
   if (!partida) {
     throw new Error(`Partida com ID ${partidaId} não encontrada.`);
   }
 
-  const cartasDoJogo: Carta[] = [
-    ...partida.tabuleiro.flat(),
-    ...partida.baralho,
-  ];
-
-  for (const jogador of partida.jogadores) {
-    cartasDoJogo.push(...jogador.cartas);
-  }
-
-  const cartasNovas = await prisma.$transaction(
-    async (xt) => {
-      await xt.partida.update({
-        where: { id: partidaId },
-        data: {
-          status: partida.status,
-          jogadores: {
-            updateMany: partida.jogadores.map((jogador) => ({
-              where: { id: jogador.id },
-              data: {
-                pontuacao: jogador.pontuacao,
-              },
-            })),
+  await prisma.partida.update({
+    where: { id: partidaId },
+    data: {
+      status: partida.status,
+      jogadores: {
+        updateMany: partida.jogadores.map((jogador) => ({
+          where: { id: jogador.id },
+          data: {
+            pontuacao: jogador.pontuacao,
           },
-        },
-      });
-      if (!cartasAlteradas) {
-        return await xt.carta.createManyAndReturn({
-          data: cartasDoJogo,
-        });
-      } else {
-        await Promise.all(
-          cartasAlteradas.map((carta) =>
-            xt.carta.update({
-              where: { id: carta.id },
-              data: {
-                posicao: carta.posicao,
-                jogador_partida_id: carta.jogador_partida_id,
-                tipo: carta.tipo,
-              },
-            })
-          )
-        );
-      }
+        })),
+      },
     },
-    { timeout: 10000 }
-  );
-
-  if (!cartasAlteradas && cartasNovas) {
-    for (const cartaNova of cartasNovas) {
-      const cartaAntiga = cartasDoJogo.find(
-        (c) =>
-          c.posicao === cartaNova.posicao &&
-          c.tipo === cartaNova.tipo &&
-          c.jogador_partida_id === cartaNova.jogador_partida_id &&
-          c.valor === cartaNova.valor
-      );
-      if (cartaAntiga) {
-        cartaAntiga.id = cartaNova.id;
-      }
-    }
-  }
+  });
 };
 
-const comprarCartas = (jogador: JogadorPartida, idPartida: number): void => {
+const comprarCartas = (jogador: JogadorComCarta, idPartida: number): void => {
   const partida = estadoPartidasAndamento.get(idPartida);
 
   if (!partida) {

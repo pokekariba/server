@@ -16,7 +16,7 @@ export const desistirEvent: ClientEvent<
     (s) => s.data.usuario.id !== socket.data.usuario.id
   )?.data.usuario.id;
 
-  partidaService.desistirPartida(
+  await partidaService.desistirPartida(
     data.idPartida,
     socket.data.usuario.id,
     idAdversario

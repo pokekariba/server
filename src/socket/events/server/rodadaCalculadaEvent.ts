@@ -1,4 +1,3 @@
-import { Carta, TipoCarta } from "@prisma/client";
 import {
   ServerEvent,
   SocketServerEventsEnum,
@@ -7,9 +6,10 @@ import {
   MotivoFinal,
   SocketServerEventsPayload,
 } from "../../../@types/SocketEventsData";
-import { JogadorPartida } from "../../../@types/EstadoPartida";
+import { JogadorComCarta } from "../../../@types/EstadoPartida";
 import partidaService from "../../../services/partida.service";
 import { emitEvent } from "../setupEvents";
+import { Carta, TipoCarta } from "../../../@types/Carta";
 
 export const rodadaCalculadaEvent: ServerEvent<
   SocketServerEventsEnum.RODADA_CALCULADA
@@ -62,7 +62,7 @@ export const rodadaCalculadaEvent: ServerEvent<
   }
 };
 
-const separarInformacoesPorJogador = (jogadores: JogadorPartida[]) => {
+const separarInformacoesPorJogador = (jogadores: JogadorComCarta[]) => {
   let maos = new Map<number, Carta[]>();
   let capturadas = new Map<number, number[]>();
   let pontuacoes = new Map<number, number>();

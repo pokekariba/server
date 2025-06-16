@@ -48,17 +48,10 @@ export function setupSocketIO(server: HttpServer) {
       }
     });
     socket.on("disconnect", () => disconnectEvent(socket, io));
-    if (socket.data.idPartidaReconectar) {
-      socket.join(socket.data.idPartidaReconectar);
-      emitEvent(socket, io, SocketServerEventsEnum.RODADA_CALCULADA, {
-        idPartida: socket.data.idPartidaReconectar,
-        reconexao: true,
-      });
-    } else {
-      socket.join("usuarios_online");
-      emitEvent(socket, io, SocketServerEventsEnum.LISTAR_PARTIDAS, {
-        to: TargetEventEnum.CLIENT,
-      });
-    }
+
+    socket.join("usuarios_online");
+    emitEvent(socket, io, SocketServerEventsEnum.LISTAR_PARTIDAS, {
+      to: TargetEventEnum.CLIENT,
+    });
   });
 }

@@ -15,13 +15,6 @@ enum StatusUsuario {
   banido
 }
 
-enum TipoCarta {
-  mao
-  mesa
-  baralho
-  capturado
-}
-
 enum CargoUsuario {
   adm
   jogador
@@ -68,12 +61,11 @@ model Partida {
   id              Int              @id @default(autoincrement())
   nome            String
   data_inicio     DateTime         @default(now())
-  data_fim        DateTime?         // nullable
+  data_fim        DateTime?        
   status          StatusPartida
   vagas           Int              @default(1)
-  senha           String?          // nullable
+  senha           String?          
   jogadores       JogadorPartida[]
-  cartas          Carta[]
   criador_id   Int
   ganhador_id  Int?
   criador      Usuario   @relation("CriadorPartida", fields: [criador_id], references: [id])
@@ -88,18 +80,6 @@ model JogadorPartida {
   usuario_id      Int
   ordem_jogada    Int
   pontuacao       Int              @default(0)
-  cartas          Carta[]
-}
-
-model Carta {
-  id                  Int              @id @default(autoincrement())
-  partida             Partida          @relation(fields: [partida_id], references: [id])
-  partida_id          Int
-  jogadorPartida      JogadorPartida?  @relation(fields: [jogador_partida_id], references: [id])
-  jogador_partida_id  Int?
-  valor               Int
-  tipo                TipoCarta
-  posicao             Int
 }
 
 model ItemLoja {

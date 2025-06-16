@@ -2,6 +2,7 @@ import express from "express";
 import protegidas from "./routes/protegidas";
 import { autenticador } from "./middleware/autenticador.middleware";
 import authRoutes from "./routes/authRoutes";
+import path from "path";
 
 const app = express();
 app.use((req, res, next) => {
@@ -17,6 +18,7 @@ app.use((req, res, next) => {
   next();
 });
 app.use(express.json());
+app.use("/images", express.static(path.join(__dirname, "public/images")));
 app.use("/logged", autenticador, protegidas);
 app.use(authRoutes);
 

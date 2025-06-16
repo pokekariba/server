@@ -20,7 +20,9 @@ export const handShakeMiddleware = async (
     if (payload.tipo !== "access") {
       return next(socketError("Token inválido ou expirado.", 401));
     }
-    let usuario = await usuarioService.buscarUsuario({id: Number(payload.id)});
+    let usuario = await usuarioService.buscarUsuario({
+      id: Number(payload.id),
+    });
 
     if (!usuario) {
       return next(socketError("Usuário não encontrado.", 404));
@@ -30,16 +32,12 @@ export const handShakeMiddleware = async (
       return next(socketError("Usuário banido.", 403));
     }
 
-    if (usuario.status === StatusUsuario.em_partida) {
-      const partida = await partidaService.buscarPartidaPeloUsuario(usuario.id);
-      if (partida) {
-        socket.data.idPartidaReconectar = partida.id;
-      }
-    }
+    usuario = await usuarioService.mudarStatusUsuario(
+      StatusUsuario.online,
+      usuario.id,
+      socket
+    );
 
-    if (!socket.data.idPartidaReconectar) {
-      usuario = await usuarioService.mudarStatusUsuario(StatusUsuario.online, usuario.id, socket);
-    }
     socket.data.usuario = usuario;
     next();
   } catch (err: any) {
