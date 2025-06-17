@@ -3,6 +3,7 @@ import prisma from "../config/prisma.config";
 import { gerarNomeImagem, sanitizarImagem } from "../utils/imageUtil";
 import path from "path";
 import fs from "fs/promises";
+import cloudinary from "../config/cloudinary.config";
 
 export const adicionarImagemItem = async (req: Request, res: Response) => {
   const { idItem } = req.body;
@@ -46,10 +47,48 @@ export const adicionarImagemItem = async (req: Request, res: Response) => {
   }
 };
 
-export const visualizarItem = async (
-  req: Request,
-  res: Response
-): Promise<void> => {
+// export const visualizarItem = async (
+//   req: Request,
+//   res: Response
+// ): Promise<void> => {
+//   const { itemId } = req.body;
+
+//   if (typeof itemId !== "number") {
+//     res.status(400).json({ mensagem: "itemId inválido" });
+//     return;
+//   }
+
+//   try {
+//     const folderPath = path.join(
+//       __dirname,
+//       "../public/images/itens",
+//       itemId.toString()
+//     );
+
+//     try {
+//       await fs.access(folderPath);
+//     } catch {
+//       res.status(200).json({ urlsItem: [] });
+//       return;
+//     }
+
+//     const files = await fs.readdir(folderPath);
+
+//     const baseUrl = `${req.protocol}://${req.get("host")}`;
+//     const urlsItem = files.map(
+//       (fileName) => `${baseUrl}/images/itens/${itemId}/${fileName}`
+//     );
+
+//     res.status(200).json({ urlsItem });
+//   } catch (error) {
+//     console.error("Erro ao buscar imagens localmente:", error);
+//     res
+//       .status(500)
+//       .json({ mensagem: "Erro interno tente novamente mais tarde." });
+//   }
+// };
+
+export const visualizarItem = async (req: Request, res: Response): Promise<void> => {
   const { itemId } = req.body;
 
   if (typeof itemId !== "number") {
@@ -58,31 +97,17 @@ export const visualizarItem = async (
   }
 
   try {
-    const folderPath = path.join(
-      __dirname,
-      "../public/images/itens",
-      itemId.toString()
-    );
+    const resultado = await cloudinary.search
+      .expression(`public_id:itens/${itemId}/item_${itemId}*`)
+      .sort_by("created_at", "desc")
+      .max_results(30)
+      .execute();
 
-    try {
-      await fs.access(folderPath);
-    } catch {
-      res.status(200).json({ urlsItem: [] });
-      return;
-    }
-
-    const files = await fs.readdir(folderPath);
-
-    const baseUrl = `${req.protocol}://${req.get("host")}`;
-    const urlsItem = files.map(
-      (fileName) => `${baseUrl}/images/itens/${itemId}/${fileName}`
-    );
+    const urlsItem = resultado.resources.map((img: any) => img.secure_url);
 
     res.status(200).json({ urlsItem });
   } catch (error) {
-    console.error("Erro ao buscar imagens localmente:", error);
-    res
-      .status(500)
-      .json({ mensagem: "Erro interno tente novamente mais tarde." });
+    console.error("Erro ao buscar imagens no Cloudinary:", error);
+    res.status(500).json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
