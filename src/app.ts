@@ -26,8 +26,17 @@ app.use(
   })
 );
 app.use(express.json());
-app.use("/images", express.static(path.join(__dirname, "public/images")));
 app.use("/logged", autenticador, protegidas);
 app.use(authRoutes);
+app.use(
+  "/images",
+  express.static(path.join(__dirname, "public/images"), {
+    setHeaders: (res, path) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+      res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    },
+  })
+);
 
 export default app;
