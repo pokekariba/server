@@ -65,6 +65,7 @@ const usuarioService = {
         partidas_totais: 0,
         avatar_ativo: 0,
         fundo_ativo: 0,
+        avatar_variante: 0,
         deck_ativo: 0,
         status: StatusUsuario.offline,
         cargo: CargoUsuario.jogador,
