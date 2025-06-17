@@ -35,6 +35,8 @@ export const salaAtualizadaEvent: ServerEvent<
     avatar_ativo: jogador.avatar_ativo,
     partidas_totais: jogador.partidas_totais,
     partidas_ganhas: jogador.partidas_ganhas,
+    deck_ativo: jogador.deck_ativo,
+    avatar_variante: jogador.avatar_variante,
   }));
 
   io.to(String(data.idPartida)).emit(

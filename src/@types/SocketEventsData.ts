@@ -91,5 +91,10 @@ export enum MotivoFinal {
 
 export type JogadoresSala = Pick<
   Usuario,
-  "nome" | "avatar_ativo" | "partidas_totais" | "partidas_ganhas"
+  | "nome"
+  | "deck_ativo"
+  | "avatar_variante"
+  | "avatar_ativo"
+  | "partidas_totais"
+  | "partidas_ganhas"
 >;
