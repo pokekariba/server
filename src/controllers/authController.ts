@@ -49,6 +49,7 @@ export const login = async (req: Request, res: Response): Promise<void> => {
       avatarAtivo: user.avatar_ativo,
       fundoAtivo: user.fundo_ativo,
       baralhoAtivo: user.deck_ativo,
+      avatarVariante: user.avatar_variante,
     });
   } catch (erro) {
     console.error("Erro no login:", erro);

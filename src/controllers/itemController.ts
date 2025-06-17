@@ -158,3 +158,48 @@ export const editarItem = async (
       .json({ mensagem: "Erro interno tente novamente mais tarde." });
   }
 };
+
+export const equiparItem = async (req: Request, res: Response) => {
+  const usuarioId = res.locals.usuario.id;
+  try {
+    const { idItem, variante } = req.body;
+
+    const item = await prisma.itemUsuario.findFirst({
+      where: { item_loja_id: idItem, usuario_id: usuarioId },
+      include: { itemLoja: true },
+    });
+
+    const tipo = {
+      [TipoItemLoja.avatar]: "avatar_ativo",
+      [TipoItemLoja.deck]: "deck_ativo",
+      [TipoItemLoja.fundo]: "fundo_ativo",
+    };
+
+    if (!item) {
+      res.status(404).json({ mensagem: "Item não encontrado" });
+      return;
+    }
+    const tipoItem = tipo[item.itemLoja.tipo];
+    if (!tipoItem) {
+      res.status(404).json({ mensagem: "Item não encontrado" });
+      return;
+    }
+    await prisma.usuario.update({
+      where: { id: usuarioId },
+      data: { [tipoItem]: item.item_loja_id },
+    });
+
+    if (variante) {
+      await prisma.usuario.update({
+        where: { id: usuarioId },
+        data: { avatar_variante: variante },
+      });
+    }
+    res.status(200).json({ itens: item });
+  } catch (erro) {
+    console.error("Erro ao listar itens da loja:", erro);
+    res
+      .status(500)
+      .json({ mensagem: "Erro interno tente novamente mais tarde." });
+  }
+};
