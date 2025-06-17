@@ -5,7 +5,7 @@ import {
 } from "../../../@types/SocketEvents";
 import { MotivoFinal } from "../../../@types/SocketEventsData";
 import partidaService from "../../../services/partida.service";
-import { emitEvent } from "../setupEvents";
+import { emitEvent } from "../emitEvents";
 
 export const desistirEvent: ClientEvent<
   SocketClientEventsEnum.DESISTIR_PARTIDA

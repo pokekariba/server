@@ -1,37 +1,20 @@
 import { Server, Socket } from "socket.io";
-import {
-  ClientEvent,
-  ServerEvent,
-  SocketClientEventsEnum,
-  SocketServerEventsEnum,
-} from "../../@types/SocketEvents";
-import { SocketServerEventsData } from "../../@types/SocketEventsData";
+import { ClientEvent, SocketClientEventsEnum } from "../../@types/SocketEvents";
 import { jogadaEvent } from "./client/jogadaEvent";
-import { desistirEvent } from "./client/desistirEvent";
 import { entrarPartidaEvent } from "./client/entrarPartidaEvent";
 import { iniciarPartidaEvent } from "./client/iniciarPartidaEvent";
-import { sairPartidaEvent } from "./client/sairPartidaEvent";
 import { criarPartidaEvent } from "./client/criarPartidaEvent";
-import { listarPartidasEvent } from "./server/listarPartidasEvent";
-import { finalPartidaEvent } from "./server/finalPartidaEvent";
-import { salaAtualizadaEvent } from "./server/salaAtualizadaEvent";
 import { typedKeys } from "../../utils/typedKeys";
-import { rodadaCalculadaEvent } from "./server/rodadaCalculadaEvent";
+import { sairPartidaEvent } from "./client/sairPartidaEvent";
+import { desistirEvent } from "./client/desistirEvent";
 
 const clientEvents: { [K in SocketClientEventsEnum]: ClientEvent<K> } = {
+  desistir_partida: desistirEvent,
   jogada: jogadaEvent,
   entrar_partida: entrarPartidaEvent,
   iniciar_partida: iniciarPartidaEvent,
   criar_partida: criarPartidaEvent,
-  desistir_partida: desistirEvent,
   sair_partida: sairPartidaEvent,
-};
-
-const serverEvents: { [K in SocketServerEventsEnum]: ServerEvent<K> } = {
-  listar_partidas: listarPartidasEvent,
-  final_partida: finalPartidaEvent,
-  sala_atualizada: salaAtualizadaEvent,
-  rodada_calculada: rodadaCalculadaEvent,
 };
 
 export const setupEvents = (socket: Socket, io: Server) => {
@@ -52,6 +35,7 @@ export const setupEvents = (socket: Socket, io: Server) => {
     }
 
     const handler = clientEvents[event];
+    console.log(clientEvents[event]);
     socket.data.__boundEvents.add(event);
 
     console.log(`Registrando listener ${event} para ${socket.id}`);
@@ -60,13 +44,4 @@ export const setupEvents = (socket: Socket, io: Server) => {
       handler(socket, io, payload);
     });
   }
-};
-
-export const emitEvent = <T extends SocketServerEventsEnum>(
-  socket: Socket,
-  io: Server,
-  event: T,
-  payload: SocketServerEventsData[T]
-) => {
-  serverEvents[event](socket, io, payload);
 };

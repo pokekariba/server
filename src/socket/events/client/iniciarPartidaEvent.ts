@@ -5,7 +5,7 @@ import {
 } from "../../../@types/SocketEvents";
 import partidaService from "../../../services/partida.service";
 import { socketError } from "../../../utils/socketError";
-import { emitEvent } from "../setupEvents";
+import { emitEvent } from "../emitEvents";
 
 export const iniciarPartidaEvent: ClientEvent<
   SocketClientEventsEnum.INICIAR_PARTIDA

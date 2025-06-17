@@ -7,8 +7,8 @@ import {
 import partidaService from "../../../services/partida.service";
 import usuarioService from "../../../services/usuario.service";
 import { socketError } from "../../../utils/socketError";
-import { emitEvent } from "../setupEvents";
 import { TargetEventEnum } from "../../../@types/SocketEventsData";
+import { emitEvent } from "../emitEvents";
 
 export const criarPartidaEvent: ClientEvent<
   SocketClientEventsEnum.CRIAR_PARTIDA

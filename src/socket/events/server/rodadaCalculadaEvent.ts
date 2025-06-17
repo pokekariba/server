@@ -8,8 +8,8 @@ import {
 } from "../../../@types/SocketEventsData";
 import { JogadorComCarta } from "../../../@types/EstadoPartida";
 import partidaService from "../../../services/partida.service";
-import { emitEvent } from "../setupEvents";
 import { Carta, TipoCarta } from "../../../@types/Carta";
+import { emitEvent } from "../emitEvents";
 
 export const rodadaCalculadaEvent: ServerEvent<
   SocketServerEventsEnum.RODADA_CALCULADA

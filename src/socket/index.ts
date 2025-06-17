@@ -3,13 +3,14 @@ import { Server as HttpServer } from "http";
 import { handShakeMiddleware } from "../middleware/handshake.middleware";
 import { socketMiddleware } from "../middleware/socket.middleware";
 import { disconnectEvent } from "./events/client/disconnect.event";
-import { emitEvent, setupEvents } from "./events/setupEvents";
+import { setupEvents } from "./events/setupEvents";
 import {
   SocketClientEventsEnum,
   SocketServerEventsEnum,
 } from "../@types/SocketEvents";
 import { TargetEventEnum } from "../@types/SocketEventsData";
 import { partidaMiddleware } from "../middleware/partida.middleware";
+import { emitEvent } from "./events/emitEvents";
 
 const eventosVerificacaoPartida: SocketClientEventsEnum[] = [
   SocketClientEventsEnum.DESISTIR_PARTIDA,

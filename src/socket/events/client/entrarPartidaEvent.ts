@@ -8,8 +8,8 @@ import partidaService from "../../../services/partida.service";
 import { socketError } from "../../../utils/socketError";
 import { compararString } from "../../../utils/criptografia";
 import usuarioService from "../../../services/usuario.service";
-import { emitEvent } from "../setupEvents";
 import { TargetEventEnum } from "../../../@types/SocketEventsData";
+import { emitEvent } from "../emitEvents";
 
 export const entrarPartidaEvent: ClientEvent<
   SocketClientEventsEnum.ENTRAR_PARTIDA

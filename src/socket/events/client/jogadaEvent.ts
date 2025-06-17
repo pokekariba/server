@@ -7,8 +7,7 @@ import {
 import { MotivoFinal } from "../../../@types/SocketEventsData";
 import partidaService from "../../../services/partida.service";
 import { socketError } from "../../../utils/socketError";
-import { emitEvent } from "../setupEvents";
-
+import { emitEvent } from "../emitEvents";
 export const jogadaEvent: ClientEvent<SocketClientEventsEnum.JOGADA> = async (
   socket,
   io,

@@ -145,7 +145,17 @@ const partidaService = {
             },
           },
         },
-        data: { status: StatusUsuario.online },
+        data: {
+          status: StatusUsuario.online,
+          partidas_totais: { increment: 1 },
+        },
+      });
+
+      await dx.usuario.update({
+        where: { id: Number(idGanhador) },
+        data: {
+          partidas_ganhas: { increment: 1 },
+        },
       });
 
       await dx.jogadorPartida.updateMany({
@@ -321,7 +331,16 @@ const partidaService = {
             },
           },
         },
-        data: { status: StatusUsuario.online },
+        data: {
+          status: StatusUsuario.online,
+          partidas_totais: { increment: 1 },
+        },
+      });
+      await tx.usuario.update({
+        where: { id: ganhador_id },
+        data: {
+          partidas_ganhas: { increment: 1 },
+        },
       });
     });
 
