@@ -47,7 +47,7 @@ model Usuario {
   partidas_ganhas  Int              @default(0)
   partidas_totais  Int              @default(0)
   avatar_ativo     Int
-  avatar_variante  Int
+  avatar_variante  Int?              @default(0)
   fundo_ativo      Int
   deck_ativo       Int
   status           StatusUsuario
